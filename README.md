@@ -1,4 +1,4 @@
-# BetterBuyOrders
+# Better Buy Orders
 Improves Steam market buy orders (hot-swap view different currencies and extended listings)
 
 <img src="http://fat.gfycat.com/LiquidRelievedBarebirdbat.gif"></img>
