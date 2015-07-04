@@ -12,6 +12,10 @@ Better Buy Orders can be installed using <a href="https://chrome.google.com/webs
 
 #Changelog
 
-v0.4 Initial Public Release
+v1.0 Initial Public Release
+
+#Suggestions/Bugs
+
+Are you encountering a bug or have a suggestion? Please use the available Github panel or contact me on <a href="http://steamcommunity.com/id/Step7750/">Steam</a>
 
 
