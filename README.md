@@ -8,7 +8,7 @@ BBO is a little script this extends the functionality of the "Buy Orders" system
 
 # How to Install
 
-Better Buy Orders can be installed using Tampermonkey or Greasemonkey on Chrome and Firefox (other browsers have not been tested)
+Better Buy Orders can be installed using <a href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=en">Tampermonkey</a> on Google Chrome or <a href="https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/">Greasemonkey</a> on Mozilla Firefox (other browsers have not been tested)
 
 #Changelog
 
