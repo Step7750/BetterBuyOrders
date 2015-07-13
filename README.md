@@ -15,6 +15,7 @@ After you install the appropriate extension, just click <a href="https://github.
 #Changelog
 
 v1.0 Initial Public Release
+v1.1 Added HTTPS support
 
 #Suggestions/Bugs
 
