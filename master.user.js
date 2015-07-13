@@ -5,6 +5,7 @@
 // @version    1.0
 // @description  Improves Steam market buy orders (hot-swap view currency changing and extended listings)
 // @match      http://steamcommunity.com/market/listings/*
+// @match      https://steamcommunity.com/market/listings/*
 // @copyright  2015+, Stepan Fedorko-Bartos
 // @grant      none
 // ==/UserScript==
@@ -38,7 +39,7 @@ function main_execute() {
   function Market_LoadOrderSpread( item_nameid )
   {
     $J.ajax( {
-      url: 'http://steamcommunity.com/market/itemordershistogram',
+      url: window.location.protocol + '//steamcommunity.com/market/itemordershistogram',
       type: 'GET',
       data: {
         country: g_strCountryCode,
