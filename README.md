@@ -18,6 +18,10 @@ v1.0 Initial Public Release
 
 v1.1 Added HTTPS support
 
+v1.2 Better Localization Support
+     Fixed a bug in the handling of the polish network response
+     Improved the handling of the animation so that it only executes after the request is fully complete
+
 #Suggestions/Bugs
 
 Are you encountering a bug or have a suggestion? Please use the available Github panel or contact me on <a href="http://steamcommunity.com/id/Step7750/">Steam</a>
