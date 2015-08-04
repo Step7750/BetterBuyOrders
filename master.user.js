@@ -2,7 +2,7 @@
 // @name       Better Buy Orders
 // @author     Stepan Fedorko-Bartos, Step7750
 // @namespace
-// @version    1.1
+// @version    1.2
 // @description  Improves Steam market buy orders (hot-swap view currency changing and extended listings)
 // @match      http://steamcommunity.com/market/listings/*
 // @match      https://steamcommunity.com/market/listings/*
@@ -33,7 +33,7 @@ function main_execute() {
       Market_LoadOrderSpread(ItemActivityTicker.m_llItemNameID);
     }
   });
-
+  window.show_tables = 0;
 
   // Overwrites Valve's function here: http://steamcommunity-a.akamaihd.net/public/javascript/market.js
   function Market_LoadOrderSpread( item_nameid )
@@ -54,8 +54,9 @@ function main_execute() {
       if ( data.success == 1 )
       {
         // Better Buy Orders
-        var buy_order_build_html = '<table class="market_commodity_orders_table"><tr><th align="right">Price</th><th align="right">Quantity</th></tr>';
-        var sell_order_build_html = '<table class="market_commodity_orders_table"><tr><th align="right">Price</th><th align="right">Quantity</th></tr>';
+          
+        var buy_order_build_html = '<table class="market_commodity_orders_table"><tr>' + $J(data.buy_order_table).children("tbody").eq(0).children("tr").eq(0).html() + '</tr>';
+        var sell_order_build_html = '<table class="market_commodity_orders_table"><tr>' + $J(data.buy_order_table).children("tbody").eq(0).children("tr").eq(0).html() + '</tr>';
 
         // Make an deep copy object that stores the quantity at each amount
         var quantity_buy_order = $J.extend(true, [], data.buy_order_graph);
@@ -115,14 +116,19 @@ function main_execute() {
         if ((data.buy_order_summary).search(total_shown_buy_orders) == -1 && data.buy_order_graph.length > 0) {
           // Not all of the possible listings are shown, put the "or more" tag and calculate the remaining orders
           // Get the total amount of buy listings
-          var totallistings = $J(data.buy_order_summary).text().split(" ")[0];
-          buy_order_build_html += '<td align="right">' + data.price_prefix + (quantity_buy_order[quantity_buy_order.length - 1][0] - 0.01).toFixed(2) + data.price_suffix + ' or less</td><td align="right">' + (totallistings - total_shown_buy_orders) + '</td></tr><tr>';
+          var totallistings = $J(data.buy_order_summary.replace("Ceny ", "")).text().split(" ")[0];
+            
+          // Update for localization, get the "or more" or "or less" text from the response rather than hard coding in english
+          var orless = $J(data.buy_order_table).children("tbody").eq(0).children().last().children().eq(0).text().replace(data.price_prefix, "").replace(data.price_suffix, "").replace(/\d+([,.]\d+)?/, "").trim();
+          buy_order_build_html += '<td align="right">' + data.price_prefix + (quantity_buy_order[quantity_buy_order.length - 1][0] - 0.01).toFixed(2) + data.price_suffix + ' ' + orless + '</td><td align="right">' + (totallistings - total_shown_buy_orders) + '</td></tr><tr>';
         }
         if ((data.sell_order_summary).search(total_shown_sell_orders) == -1 && data.sell_order_graph.length > 0) {
           // Not all of the possible listings are shown, put the "or more" tag and calculate the remaining orders
           // Get total amount of buy listings
-          var totallistings = $J(data.sell_order_summary).text().split(" ")[0];
-          sell_order_build_html += '<td align="right">' + data.price_prefix + (quantity_sell_order[quantity_sell_order.length - 1][0] + 0.01).toFixed(2) + data.price_suffix + ' or more</td><td align="right">' + (totallistings - total_shown_sell_orders) + '</td></tr><tr>';
+          var totallistings = $J(data.sell_order_summary.replace("Ceny ", "")).text().split(" ")[0];
+            
+          var ormore = $J(data.sell_order_table).children("tbody").eq(0).children().last().children().eq(0).text().replace(data.price_prefix, "").replace(data.price_suffix, "").replace(/\d+([,.]\d+)?/, "").trim();
+          sell_order_build_html += '<td align="right">' + data.price_prefix + (quantity_sell_order[quantity_sell_order.length - 1][0] + 0.01).toFixed(2) + data.price_suffix + ' ' + ormore + '</td><td align="right">' + (totallistings - total_shown_sell_orders) + '</td></tr><tr>';
         }
         sell_order_build_html += '</table>', buy_order_build_html += '</table>';
         // Overwrite the old table
@@ -140,8 +146,19 @@ function main_execute() {
         else {
           $J('#market_commodity_forsale_table').html(data.sell_order_table);
         }
-
-
+        
+        // Call to 
+          
+        if (show_tables == 1) {
+            if ($J("#market_commodity_buyreqeusts_table").is(":hidden")) {
+                $J("#market_commodity_buyreqeusts_table").hide().slideDown();
+            }
+            else {
+                $J("#market_commodity_forsale_table").hide().slideDown();
+            }
+          show_tables = 0;
+        }
+        
         // The rest of this function is just a copy and paste of some of the original code in this function by Valve
 
         // set in the purchase dialog the default price to buy things (which should almost always be the price of the cheapest listed item)
@@ -217,9 +234,9 @@ function main_execute() {
           });
         }
       }
+        
     } );
     // End of Valve's original code
-    return $J.Deferred().resolve();
   }
   if (ItemActivityTicker.m_llItemNameID != null) {
     Market_LoadOrderSpread(ItemActivityTicker.m_llItemNameID);
@@ -238,7 +255,6 @@ function main_execute() {
     // Called by the respective buttons
 
     if (type == 0) {
-      //$J("#show_more_buy").slideUp();
       // Valve's spelling error
       $J("#market_commodity_buyreqeusts_table").slideUp('fast', function () {
         if(bbo_buy_enable == 1) {
@@ -249,16 +265,12 @@ function main_execute() {
           bbo_buy_enable = 1;
           $J("#show_more_buy").children().eq(0).html('Show Less Orders <span class="popup_menu_pulldown_indicator" id="arrow_sell_button" style="-webkit-transform: rotate(-180deg); -ms-transform: rotate(-180deg); transform: rotate(-180deg);">');
         }
-        // Delay it a bit since to make sure the DOM was 100% complete being modified
         clearTimeout(buyordertimeout);
-        Market_LoadOrderSpread(ItemActivityTicker.m_llItemNameID).done(setTimeout(function() {$J("#market_commodity_buyreqeusts_table").slideDown()}, 100));
-        //$J("#show_more_buy").slideDown();
+        show_tables = 1;
+        Market_LoadOrderSpread(ItemActivityTicker.m_llItemNameID)
       });
     }
     else {
-      $J("#market_commodity_forsale_table").slideUp();
-
-      //$J("#show_more_sell").slideUp();
       $J("#market_commodity_forsale_table").slideUp('fast', function () {
         if(bbo_sell_enable == 1) {
           bbo_sell_enable = 0;
@@ -268,10 +280,10 @@ function main_execute() {
           bbo_sell_enable = 1;
           $J("#show_more_sell").children().eq(0).html('Show Less Orders <span class="popup_menu_pulldown_indicator" id="arrow_sell_button" style="-webkit-transform: rotate(-180deg); -ms-transform: rotate(-180deg); transform: rotate(-180deg);">');
         }
-        // Delay it a bit since to make sure the DOM was 100% complete being modified
         clearTimeout(buyordertimeout);
-        Market_LoadOrderSpread(ItemActivityTicker.m_llItemNameID).done(setTimeout(function() {$J("#market_commodity_forsale_table").slideDown()}, 100));
-        //$J("#show_more_sell").slideDown();
+        show_tables = 1;
+        // Updated the call to just show the tables if needed within the construction function
+        Market_LoadOrderSpread(ItemActivityTicker.m_llItemNameID)
       });
     }
   }
@@ -295,5 +307,5 @@ function main_execute() {
     targ.appendChild (scriptNode);
   }
 
-  console.log('%c Better Buy Orders (v0.4) by Step7750', 'background: #222; color: #fff;');
+  console.log('%c Better Buy Orders (v1.2) by Step7750 ', 'background: #222; color: #fff;');
 }
