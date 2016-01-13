@@ -2,7 +2,7 @@
 // @name       Better Buy Orders
 // @author     Stepan Fedorko-Bartos, Step7750
 // @namespace
-// @version    1.2
+// @version    1.2.5
 // @description  Improves Steam market buy orders (hot-swap view currency changing and extended listings)
 // @match      http://steamcommunity.com/market/listings/*
 // @match      https://steamcommunity.com/market/listings/*
@@ -11,11 +11,13 @@
 // ==/UserScript==
 
 
-/**
- * Created by Step7750-Workstation on 7/2/2015.
- */
-// Execute after full page load (ensure the original function is loaded)
-window.addEventListener ("load", main_execute, false);
+// Execute after full page load (added readyState for Mac systems etc...)
+if (document.readyState == 'complete') {
+    main_execute();
+}
+else {
+    window.addEventListener ("load", main_execute, false);
+}
 
 
 function main_execute() {
