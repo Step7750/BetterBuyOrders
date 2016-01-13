@@ -25,6 +25,9 @@ v1.2
 * Fixed a bug in the handling of the Polish network response
 * Improved the handling of the animation so that it only executes after the request is fully complete
 
+v1.2.5
+* Fixes crucial bug for Mac systems (at least on Chrome) that don't properly run the script
+
 #Suggestions/Bugs
 
 Are you encountering a bug or have a suggestion? Please use the available Github panel or contact me on <a href="http://steamcommunity.com/id/Step7750/">Steam</a>
