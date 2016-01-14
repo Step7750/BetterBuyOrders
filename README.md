@@ -44,6 +44,9 @@ v1.3
 * Added more/less buy orders on item pages with no items
 * Added currency selector on item pages with no items
 
+v1.3.1
+* Changes injection timings in order to prevent waiting for the item id on pages with no items
+
 #Suggestions/Bugs
 
 Are you encountering a bug or have a suggestion? Please use the available Github panel or contact me on <a href="http://steamcommunity.com/id/Step7750/">Steam</a>
