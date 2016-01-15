@@ -2,7 +2,7 @@
 // @name       Better Buy Orders
 // @author     Stepan Fedorko-Bartos, Step7750
 // @namespace
-// @version    1.3.1
+// @version    1.3.2
 // @description  Improves Steam market buy orders (hot-swap view currency changing and extended listings)
 // @match      http://steamcommunity.com/market/listings/*
 // @match      https://steamcommunity.com/market/listings/*
@@ -39,7 +39,6 @@ else {
 
 
 function main_execute() {
-    // global variables toggling the state of the extended orders
     
     if ($J(".market_commodity_order_block").length > 0) {
         // Injects the hot-swap currency selector for commodity items
@@ -59,6 +58,8 @@ function main_execute() {
         }
         if ((ItemActivityTicker.m_llItemNameID != null && $J(".market_commodity_order_block").length > 0)) {
             Market_LoadOrderSpread(ItemActivityTicker.m_llItemNameID);
+            // update item activity
+            ItemActivityTicker.Load();
         }
         else if ($J("#market_buyorder_info_details_tablecontainer").length > 0 && itemid != null) {
             Market_LoadOrderSpread(itemid);
@@ -85,7 +86,7 @@ function main_execute() {
     
     window.editeddom = 1
 
-    console.log('%c Better Buy Orders (v1.3.1) by Step7750 ', 'background: #222; color: #fff;');
+    console.log('%c Better Buy Orders (v1.3.2) by Step7750 ', 'background: #222; color: #fff;');
     console.log('%c Changelog can be found here: https://github.com/Step7750/BetterBuyOrders', 'background: #222; color: #fff;')
 }
 
@@ -387,7 +388,7 @@ function beforescript() {
     
     function CreatePriceHistoryGraph( line1, numYAxisTicks, strFormatPrefix, strFormatSuffix )
     {
-        // Valve's native functions do work properly on items with no listings, little edits were done...
+        // Valve's native functions don't work properly on items with no listings, little edits were done...
         if (document.getElementById("pricehistory") != null) {
             var plot = $J.jqplot('pricehistory', [line1], {
                 title:{text: 'Median Sale Prices', textAlign: 'left' },
@@ -438,7 +439,7 @@ function beforescript() {
 
     function InstallMarketActionMenuButtons()
     {
-        // Valve's native functions do work properly on items with no listings, little edits were done...
+        // Valve's native functions don't work properly on items with no listings, little edits were done...
         if (document.getElementById("pricehistory") != null) {
             for ( var listing in g_rgListingInfo ) {
                 var asset = g_rgListingInfo[listing].asset;
@@ -461,7 +462,7 @@ function beforescript() {
 
     function pricehistory_zoomMonthOrLifetime( plotPriceHistory, timePriceHistoryEarliest, timePriceHistoryLatest )
     {
-        // Valve's native functions do work properly on items with no listings, little edits were done...
+        // Valve's native functions don't work properly on items with no listings, little edits were done...
         if (document.getElementById("pricehistory") != null) {
             var timeMonthAgo = new Date( timePriceHistoryLatest.getTime() - ( 30 * 24 * 60 * 60 * 1000 ) );
             plotPriceHistory.resetZoom();
@@ -496,6 +497,33 @@ function beforescript() {
             return false;
         }
     }
+    
+    ItemActivityTicker.Load =  function() {
+        // overwrite currency selection
+		$J.ajax( {
+			url: 'http://steamcommunity.com/market/itemordersactivity',
+			type: 'GET',
+			data: {
+				country: g_strCountryCode,
+				language: g_strLanguage,
+				currency: $J("#currency_buyorder").val() || (typeof( g_rgWalletInfo ) != 'undefined' && g_rgWalletInfo['wallet_currency'] != 0 ? g_rgWalletInfo['wallet_currency'] : 1),
+				item_nameid: this.m_llItemNameID || itemid,
+				two_factor: BIsTwoFactorEnabled() ? 1 : 0
+			}
+		} ).fail( function( jqxhr ) {
+			setTimeout( function() { ItemActivityTicker.Load(); }, 10000 );
+		} ).done( function( data ) {
+			setTimeout( function() { ItemActivityTicker.Load(); }, 10000 );
+			if ( data.success == 1 )
+			{
+				if ( data.timestamp > ItemActivityTicker.m_nTimeLastLoaded )
+				{
+					ItemActivityTicker.m_nTimeLastLoaded = data.timestamp;
+					ItemActivityTicker.Update( data.activity );
+				}
+			}
+		} );
+	}
     
     addJS_Node(CreatePriceHistoryGraph);
     addJS_Node(pricehistory_zoomMonthOrLifetime);
