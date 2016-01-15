@@ -2,7 +2,7 @@
 // @name       Better Buy Orders
 // @author     Stepan Fedorko-Bartos, Step7750
 // @namespace
-// @version    1.3
+// @version    1.4
 // @description  Improves Steam market buy orders (hot-swap view currency changing and extended listings)
 // @match      http://steamcommunity.com/market/listings/*
 // @match      https://steamcommunity.com/market/listings/*
@@ -21,6 +21,7 @@ window.itemid = null;
 window.show_tables = 0;
 window.editeddom = 0;
 window.nolistings = 0;
+window.proccessed_order = 0;
 
 // We need to replace some page functions immediately after the body is loaded
 beforescript();
@@ -37,9 +38,19 @@ else {
     }
 }
 
+function no_orders_no_listings() {
+    if (window.proccessed_order == 0) {
+        // this appears to be an item with no market listings and no current buy orders, we don't have the URL, but we can find some info about it
+        console.log("Item with no listings and no buy orders")
+        
+        var itemname = escapeHtml('"' + $J(".market_listing_nav a").eq(1).text().replace("★", "\\u2605").replace("™", "\\u2122") + '"');
+        console.log(itemname);
+        $J("#searchResultsTable").prepend('<div id="market_buyorder_info" class="market_listing_row"><div><div style="float: right"><a class="btn_green_white_innerfade btn_medium" href="javascript:void(0)" onclick="Market_ShowBuyOrderPopup( 730, ' + itemname + ', ' + itemname + '); return false;"><span>Place buy order...</span></a></div><div id="market_commodity_buyrequests"><span class="market_commodity_orders_header_promote">0</span> requests to buy at <span class="market_commodity_orders_header_promote">0.00</span> or lower</div></div><div id="market_buyorder_info_show_details"><span onclick="$J(\'#market_buyorder_info_show_details\').hide(); $J(\'#market_buyorder_info_details\').show();"> View more details </span></div><div id="market_buyorder_info_details" style="display: none;"><div id="market_buyorder_info_details_tablecontainer" style="padding-left: 10px; padding-right: 15px;"><div id="market_commodity_buyreqeusts_table" class="market_commodity_orders_table_container"></div><center><div class="btn_grey_black btn_medium" id="show_more_buy" style="margin-bottom: 10px;" onclick="toggle_state(0)"><span>Show More Orders <span class="popup_menu_pulldown_indicator" id="arrow_buy_button"></span></span></div></center></div><div id="market_buyorder_info_details_explanation"><p>You can place an order to buy at a specific price, and the cheapest listing will automatically get matched to the highest buy order.</p><p>For this item, buy orders will be matched with the cheapest option to buy regardless of any unique characteristics.</p><p>If you\'re looking for a specific characteristic, you can search or view the individual listings below.</p></div></div></div>')
+        
+    }
+}
 
 function main_execute() {
-    // global variables toggling the state of the extended orders
     
     if ($J(".market_commodity_order_block").length > 0) {
         // Injects the hot-swap currency selector for commodity items
@@ -59,6 +70,8 @@ function main_execute() {
         }
         if ((ItemActivityTicker.m_llItemNameID != null && $J(".market_commodity_order_block").length > 0)) {
             Market_LoadOrderSpread(ItemActivityTicker.m_llItemNameID);
+            // update item activity
+            ItemActivityTicker.Load();
         }
         else if ($J("#market_buyorder_info_details_tablecontainer").length > 0 && itemid != null) {
             Market_LoadOrderSpread(itemid);
@@ -85,8 +98,10 @@ function main_execute() {
     
     window.editeddom = 1
 
-    console.log('%c Better Buy Orders (v1.3.1) by Step7750 ', 'background: #222; color: #fff;');
+    console.log('%c Better Buy Orders (v1.4 BETA) by Step7750 ', 'background: #222; color: #fff;');
     console.log('%c Changelog can be found here: https://github.com/Step7750/BetterBuyOrders', 'background: #222; color: #fff;')
+    
+    no_orders_no_listings();
 }
 
 function beforescript() {
@@ -148,6 +163,7 @@ function beforescript() {
     // Overwrites Valve's function here: http://steamcommunity-a.akamaihd.net/public/javascript/market.js
     function Market_LoadOrderSpread( item_nameid )
     {
+        window.proccessed_order = 1
         if (item_nameid == null) {
             item_nameid = window.itemid;
         }
@@ -168,6 +184,7 @@ function beforescript() {
             window.buyordertimeout = setTimeout( function() { Market_LoadOrderSpread( item_nameid ); }, 5000 );
         } ).success( function( data ) {
             window.buyordertimeout = setTimeout( function() { Market_LoadOrderSpread( item_nameid ); }, 5000 );
+            
             if ( data.success == 1 )
             {
                 // Better Buy Orders
@@ -181,7 +198,7 @@ function beforescript() {
                   
                     // need to find out the item name and append it
                     // We're escaping the text jic Valve changes how they escape the specific area where we get the item name (prevent xss)
-                    var itemname = escapeHtml('"' + $J(".market_listing_nav a").eq(1).text() + '"');
+                    var itemname = escapeHtml('"' + $J(".market_listing_nav a").eq(1).text().replace("★", "\\u2605").replace("™", "\\u2122") + '"');
                     $J("#searchResultsTable").prepend('<div id="market_buyorder_info" class="market_listing_row"><div><div style="float: right"><a class="btn_green_white_innerfade btn_medium" href="javascript:void(0)" onclick="Market_ShowBuyOrderPopup( 730, ' + itemname + ', ' + itemname + '); return false;"><span>Place buy order...</span></a></div><div id="market_commodity_buyrequests"><span class="market_commodity_orders_header_promote">1684</span> requests to buy at <span class="market_commodity_orders_header_promote">CDN$ 6.72</span> or lower</div></div><div id="market_buyorder_info_show_details"><span onclick="$J(\'#market_buyorder_info_show_details\').hide(); $J(\'#market_buyorder_info_details\').show();"> View more details </span></div><div id="market_buyorder_info_details" style="display: none;"><div id="market_buyorder_info_details_tablecontainer" style="padding-left: 10px; padding-right: 15px;"><div id="market_commodity_buyreqeusts_table" class="market_commodity_orders_table_container"></div><center><div class="btn_grey_black btn_medium" id="show_more_buy" style="margin-bottom: 10px;" onclick="toggle_state(0)"><span>Show More Orders <span class="popup_menu_pulldown_indicator" id="arrow_buy_button"></span></span></div></center></div><div id="market_buyorder_info_details_explanation"><p>You can place an order to buy at a specific price, and the cheapest listing will automatically get matched to the highest buy order.</p><p>For this item, buy orders will be matched with the cheapest option to buy regardless of any unique characteristics.</p><p>If you\'re looking for a specific characteristic, you can search or view the individual listings below.</p></div></div></div>')
                     
                     // append and configure the currency selector
@@ -387,7 +404,7 @@ function beforescript() {
     
     function CreatePriceHistoryGraph( line1, numYAxisTicks, strFormatPrefix, strFormatSuffix )
     {
-        // Valve's native functions do work properly on items with no listings, little edits were done...
+        // Valve's native functions don't work properly on items with no listings, little edits were done...
         if (document.getElementById("pricehistory") != null) {
             var plot = $J.jqplot('pricehistory', [line1], {
                 title:{text: 'Median Sale Prices', textAlign: 'left' },
@@ -438,7 +455,7 @@ function beforescript() {
 
     function InstallMarketActionMenuButtons()
     {
-        // Valve's native functions do work properly on items with no listings, little edits were done...
+        // Valve's native functions don't work properly on items with no listings, little edits were done...
         if (document.getElementById("pricehistory") != null) {
             for ( var listing in g_rgListingInfo ) {
                 var asset = g_rgListingInfo[listing].asset;
@@ -461,7 +478,7 @@ function beforescript() {
 
     function pricehistory_zoomMonthOrLifetime( plotPriceHistory, timePriceHistoryEarliest, timePriceHistoryLatest )
     {
-        // Valve's native functions do work properly on items with no listings, little edits were done...
+        // Valve's native functions don't work properly on items with no listings, little edits were done...
         if (document.getElementById("pricehistory") != null) {
             var timeMonthAgo = new Date( timePriceHistoryLatest.getTime() - ( 30 * 24 * 60 * 60 * 1000 ) );
             plotPriceHistory.resetZoom();
@@ -496,6 +513,33 @@ function beforescript() {
             return false;
         }
     }
+    
+    ItemActivityTicker.Load =  function() {
+        // overwrite currency selection
+		$J.ajax( {
+			url: 'http://steamcommunity.com/market/itemordersactivity',
+			type: 'GET',
+			data: {
+				country: g_strCountryCode,
+				language: g_strLanguage,
+				currency: $J("#currency_buyorder").val() || (typeof( g_rgWalletInfo ) != 'undefined' && g_rgWalletInfo['wallet_currency'] != 0 ? g_rgWalletInfo['wallet_currency'] : 1),
+				item_nameid: this.m_llItemNameID || itemid,
+				two_factor: BIsTwoFactorEnabled() ? 1 : 0
+			}
+		} ).fail( function( jqxhr ) {
+			setTimeout( function() { ItemActivityTicker.Load(); }, 10000 );
+		} ).done( function( data ) {
+			setTimeout( function() { ItemActivityTicker.Load(); }, 10000 );
+			if ( data.success == 1 )
+			{
+				if ( data.timestamp > ItemActivityTicker.m_nTimeLastLoaded )
+				{
+					ItemActivityTicker.m_nTimeLastLoaded = data.timestamp;
+					ItemActivityTicker.Update( data.activity );
+				}
+			}
+		} );
+	}
     
     addJS_Node(CreatePriceHistoryGraph);
     addJS_Node(pricehistory_zoomMonthOrLifetime);
