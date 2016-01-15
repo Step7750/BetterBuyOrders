@@ -47,6 +47,9 @@ v1.3
 v1.3.1
 * Changes injection timings in order to prevent waiting for the item id on pages with no items
 
+v1.3.2
+* The "Activity Feed" on commodity items now reflects the currency selected
+
 #Suggestions/Bugs
 
 Are you encountering a bug or have a suggestion? Please use the available Github panel or contact me on <a href="http://steamcommunity.com/id/Step7750/">Steam</a>
