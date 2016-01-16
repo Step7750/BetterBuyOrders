@@ -2,7 +2,7 @@
 // @name       Better Buy Orders
 // @author     Stepan Fedorko-Bartos, Step7750
 // @namespace
-// @version    1.3.2
+// @version    1.4
 // @description  Improves Steam market buy orders (hot-swap view currency changing and extended listings)
 // @match      http://steamcommunity.com/market/listings/*
 // @match      https://steamcommunity.com/market/listings/*
@@ -21,6 +21,7 @@ window.itemid = null;
 window.show_tables = 0;
 window.editeddom = 0;
 window.nolistings = 0;
+window.proccessed_order = 0;
 
 // We need to replace some page functions immediately after the body is loaded
 beforescript();
@@ -37,9 +38,20 @@ else {
     }
 }
 
+function no_orders_no_listings() {
+    if (window.proccessed_order == 0) {
+        // this appears to be an item with no market listings and no current buy orders, we don't have the URL, but we can find some info about it
+        console.log("Item with no listings and no buy orders")
+
+        var itemname = escapeHtml('"' + $J(".market_listing_nav a").eq(1).text().replace("★", "\\u2605").replace("™", "\\u2122") + '"');
+        console.log(itemname);
+        $J("#searchResultsTable").prepend('<div id="market_buyorder_info" class="market_listing_row"><div><div style="float: right"><a class="btn_green_white_innerfade btn_medium" href="javascript:void(0)" onclick="Market_ShowBuyOrderPopup( 730, ' + itemname + ', ' + itemname + '); return false;"><span>Place buy order...</span></a></div><div id="market_commodity_buyrequests"><span class="market_commodity_orders_header_promote">0</span> requests to buy at <span class="market_commodity_orders_header_promote">0.00</span> or lower</div></div><div id="market_buyorder_info_show_details"><span onclick="$J(\'#market_buyorder_info_show_details\').hide(); $J(\'#market_buyorder_info_details\').show();"> View more details </span></div><div id="market_buyorder_info_details" style="display: none;"><div id="market_buyorder_info_details_tablecontainer" style="padding-left: 10px; padding-right: 15px;"><div id="market_commodity_buyreqeusts_table" class="market_commodity_orders_table_container"></div><center><div class="btn_grey_black btn_medium" id="show_more_buy" style="margin-bottom: 10px;" onclick="toggle_state(0)"><span>Show More Orders <span class="popup_menu_pulldown_indicator" id="arrow_buy_button"></span></span></div></center></div><div id="market_buyorder_info_details_explanation"><p>You can place an order to buy at a specific price, and the cheapest listing will automatically get matched to the highest buy order.</p><p>For this item, buy orders will be matched with the cheapest option to buy regardless of any unique characteristics.</p><p>If you\'re looking for a specific characteristic, you can search or view the individual listings below.</p></div></div></div>')
+
+    }
+}
 
 function main_execute() {
-    
+
     if ($J(".market_commodity_order_block").length > 0) {
         // Injects the hot-swap currency selector for commodity items
         $J(".market_commodity_order_block").children().eq(1).after('<select id="currency_buyorder" style="margin-left: 10px; margin-bottom: 5px;"><option value="1" selected>USD</option><option value="2">GBP</option><option value="3">EUR</option><option value="5">RUB</option><option value="7">BRL</option><option value="8">JPY</option><option value="9">NOK</option><option value="10">IDR</option><option value="11">MYR</option><option value="12">PHP</option><option value="13">SGD</option><option value="14">THB</option><option value="15">VND</option><option value="16">KRW</option><option value="17">TRY</option><option value="18">UAH</option><option value="19">MXN</option><option value="20">CAD</option><option value="21">AUD</option><option value="22">NZD</option></select>');
@@ -65,7 +77,7 @@ function main_execute() {
             Market_LoadOrderSpread(itemid);
         }
     });
-    
+
     // Start up the request if it is a commodity page
     if (ItemActivityTicker.m_llItemNameID != null) {
         Market_LoadOrderSpread(ItemActivityTicker.m_llItemNameID);
@@ -83,17 +95,19 @@ function main_execute() {
         $J("#market_buyorder_info_details_tablecontainer").append('<center><div class="btn_grey_black btn_medium" id="show_more_buy" style="margin-bottom: 10px;" onclick="toggle_state(0)"><span>Show More Orders <span class="popup_menu_pulldown_indicator" id="arrow_buy_button"></span></span></div></center>');
     }
 
-    
+
     window.editeddom = 1
 
-    console.log('%c Better Buy Orders (v1.3.2) by Step7750 ', 'background: #222; color: #fff;');
+    console.log('%c Better Buy Orders (v1.4 BETA) by Step7750 ', 'background: #222; color: #fff;');
     console.log('%c Changelog can be found here: https://github.com/Step7750/BetterBuyOrders', 'background: #222; color: #fff;')
+
+    no_orders_no_listings();
 }
 
 function beforescript() {
     // Replace these functions with versions that work with items with no listings, these may break if Valve starts changing them up
     // Some of the main dom monipulation functions have also been moved here since we didn't want to wait for the subsequent call for updated tables
-    
+
     function toggle_state(type) {
         // 0 = buy table, 1 = sell table
         // Called by the respective buttons
@@ -135,7 +149,7 @@ function beforescript() {
             });
         }
     }
-    
+
     function escapeHtml(text) {
         // escape any messed up item names (prevent cross scripting)
         return text
@@ -149,6 +163,7 @@ function beforescript() {
     // Overwrites Valve's function here: http://steamcommunity-a.akamaihd.net/public/javascript/market.js
     function Market_LoadOrderSpread( item_nameid )
     {
+        window.proccessed_order = 1
         if (item_nameid == null) {
             item_nameid = window.itemid;
         }
@@ -169,26 +184,32 @@ function beforescript() {
             window.buyordertimeout = setTimeout( function() { Market_LoadOrderSpread( item_nameid ); }, 5000 );
         } ).success( function( data ) {
             window.buyordertimeout = setTimeout( function() { Market_LoadOrderSpread( item_nameid ); }, 5000 );
+
             if ( data.success == 1 )
             {
                 // Better Buy Orders
 
                 if (document.getElementById("market_commodity_buyrequests") == null && ItemActivityTicker.m_llItemNameID == null) {
                     // set that we have a item with no listings (to prevent other dom manipulations)
+                    console.log("Wow")
+                    if (window.nolistings == 0) {
+                        $J("#pricehistory").css("margin-bottom", "10px");
+                        $J("#searchResultsTable").append('<div class="zoom_controls pricehistory_zoom_controls" style="margin-bottom: 10px; margin-top: 10px;">Zoom graph<a class="zoomopt" onclick="return pricehistory_zoomDays( g_plotPriceHistory, g_timePriceHistoryEarliest, g_timePriceHistoryLatest, 7 );" href="javascript:void(0)">Week</a><a class="zoomopt" onclick="return pricehistory_zoomDays( g_plotPriceHistory, g_timePriceHistoryEarliest, g_timePriceHistoryLatest, 30 );" href="javascript:void(0)">Month</a><a class="zoomopt" onclick="return pricehistory_zoomLifetime( g_plotPriceHistory, g_timePriceHistoryEarliest, g_timePriceHistoryLatest );" href="javascript:void(0)" style="padding-right: 0">Lifetime</a></div>')
+                    }
                     window.nolistings = 1;
-                    
+
                     // need to clear the waiting dialog
                     $J("#market_buyorder_info").remove();
-                  
+
                     // need to find out the item name and append it
                     // We're escaping the text jic Valve changes how they escape the specific area where we get the item name (prevent xss)
-                    var itemname = escapeHtml('"' + $J(".market_listing_nav a").eq(1).text() + '"');
+                    var itemname = escapeHtml('"' + $J(".market_listing_nav a").eq(1).text().replace("★", "\\u2605").replace("™", "\\u2122") + '"');
                     $J("#searchResultsTable").prepend('<div id="market_buyorder_info" class="market_listing_row"><div><div style="float: right"><a class="btn_green_white_innerfade btn_medium" href="javascript:void(0)" onclick="Market_ShowBuyOrderPopup( 730, ' + itemname + ', ' + itemname + '); return false;"><span>Place buy order...</span></a></div><div id="market_commodity_buyrequests"><span class="market_commodity_orders_header_promote">1684</span> requests to buy at <span class="market_commodity_orders_header_promote">CDN$ 6.72</span> or lower</div></div><div id="market_buyorder_info_show_details"><span onclick="$J(\'#market_buyorder_info_show_details\').hide(); $J(\'#market_buyorder_info_details\').show();"> View more details </span></div><div id="market_buyorder_info_details" style="display: none;"><div id="market_buyorder_info_details_tablecontainer" style="padding-left: 10px; padding-right: 15px;"><div id="market_commodity_buyreqeusts_table" class="market_commodity_orders_table_container"></div><center><div class="btn_grey_black btn_medium" id="show_more_buy" style="margin-bottom: 10px;" onclick="toggle_state(0)"><span>Show More Orders <span class="popup_menu_pulldown_indicator" id="arrow_buy_button"></span></span></div></center></div><div id="market_buyorder_info_details_explanation"><p>You can place an order to buy at a specific price, and the cheapest listing will automatically get matched to the highest buy order.</p><p>For this item, buy orders will be matched with the cheapest option to buy regardless of any unique characteristics.</p><p>If you\'re looking for a specific characteristic, you can search or view the individual listings below.</p></div></div></div>')
-                    
+
                     // append and configure the currency selector
                     $J("#market_buyorder_info_details_tablecontainer").prepend('<select id="currency_buyorder" style="margin-left: 5px; margin-top: 10px;"><option value="1" selected>USD</option><option value="2">GBP</option><option value="3">EUR</option><option value="5">RUB</option><option value="7">BRL</option><option value="8">JPY</option><option value="9">NOK</option><option value="10">IDR</option><option value="11">MYR</option><option value="12">PHP</option><option value="13">SGD</option><option value="14">THB</option><option value="15">VND</option><option value="16">KRW</option><option value="17">TRY</option><option value="18">UAH</option><option value="19">MXN</option><option value="20">CAD</option><option value="21">AUD</option><option value="22">NZD</option></select>');
                     $J("#currency_buyorder").val(typeof( g_rgWalletInfo ) != 'undefined' && g_rgWalletInfo['wallet_currency'] != 0 ? g_rgWalletInfo['wallet_currency'] : 1);
-                    
+
                     // Bind the currency selector event handler
                     $J('#currency_buyorder').on('change', function() {
                         clearTimeout(buyordertimeout);
@@ -290,7 +311,7 @@ function beforescript() {
                     $J('#market_commodity_forsale_table').html(data.sell_order_table);
                 }
 
-               
+
                 // Create animations
                 if (show_tables == 1) {
                     if ($J("#market_commodity_buyreqeusts_table").is(":hidden")) {
@@ -301,12 +322,12 @@ function beforescript() {
                     }
                     show_tables = 0;
                 }
-                
-                
+
+
                 // The rest of this function is just a copy and paste of some of the original code in this function by Valve
 
-                
-                
+
+
                 // set in the purchase dialog the default price to buy things (which should almost always be the price of the cheapest listed item)
                 if ( data.lowest_sell_order && data.lowest_sell_order > 0 )
                     CreateBuyOrderDialog.m_nBestBuyPrice = data.lowest_sell_order;
@@ -385,55 +406,57 @@ function beforescript() {
 
         } );
     }
-    
+
     function CreatePriceHistoryGraph( line1, numYAxisTicks, strFormatPrefix, strFormatSuffix )
     {
         // Valve's native functions don't work properly on items with no listings, little edits were done...
-        if (document.getElementById("pricehistory") != null) {
-            var plot = $J.jqplot('pricehistory', [line1], {
-                title:{text: 'Median Sale Prices', textAlign: 'left' },
-                gridPadding:{left: 45, right:45, top:25},
-                axesDefaults:{ showTickMarks:false },
-                axes:{
-                    xaxis:{
-                        renderer:$J.jqplot.DateAxisRenderer,
-                        tickOptions:{formatString:'%b %#d<span class="priceHistoryTime"> %#I%p<span>'},
-                        pad: 1
-                    },
-                    yaxis: {
-                        pad: 1.1,
-                        tickOptions:{formatString:strFormatPrefix + '%0.2f' + strFormatSuffix, labelPosition:'start', showMark: false},
-                        numberTicks: numYAxisTicks
-                    }
-                },
-                grid: {
-                    gridLineColor: '#414141',
-                    borderColor: '#414141',
-                    background: '#262626'
-                },
-                cursor: {
-                    show: true,
-                    zoom: true,
-                    showTooltip: false
-                },
-                highlighter: {
-                    show: true,
-                    lineWidthAdjust: 2.5,
-                    sizeAdjust: 5,
-                    showTooltip: true,
-                    tooltipLocation: 'n',
-                    tooltipOffset: 20,
-                    fadeTooltip: true,
-                    yvalues: 2,
-                    formatString: '<strong>%s</strong><br>%s<br>%d sold'
-                },
-                series:[{lineWidth:3, markerOptions:{show: false, style:'circle'}}],
-                seriesColors: [ "#688F3E" ]
-            });
-
-            plot.defaultNumberTicks = numYAxisTicks;
-            return plot;
+        if (document.getElementById("pricehistory") == null) {
+            $J("#searchResultsTable").append('<div id="pricehistory" class="jqplot-target" style="height: 300px; padding-left: 10px; margin-bottom: 30px;"></div>');   
         }
+        var plot = $J.jqplot('pricehistory', [line1], {
+            title:{text: 'Median Sale Prices', textAlign: 'left' },
+            gridPadding:{left: 45, right:45, top:25},
+            axesDefaults:{ showTickMarks:false },
+            axes:{
+                xaxis:{
+                    renderer:$J.jqplot.DateAxisRenderer,
+                    tickOptions:{formatString:'%b %#d<span class="priceHistoryTime"> %#I%p<span>'},
+                    pad: 1
+                },
+                yaxis: {
+                    pad: 1.1,
+                    tickOptions:{formatString:strFormatPrefix + '%0.2f' + strFormatSuffix, labelPosition:'start', showMark: false},
+                    numberTicks: numYAxisTicks
+                }
+            },
+            grid: {
+                gridLineColor: '#414141',
+                borderColor: '#414141',
+                background: '#262626'
+            },
+            cursor: {
+                show: true,
+                zoom: true,
+                showTooltip: false
+            },
+            highlighter: {
+                show: true,
+                lineWidthAdjust: 2.5,
+                sizeAdjust: 5,
+                showTooltip: true,
+                tooltipLocation: 'n',
+                tooltipOffset: 20,
+                fadeTooltip: true,
+                yvalues: 2,
+                formatString: '<strong>%s</strong><br>%s<br>%d sold'
+            },
+            series:[{lineWidth:3, markerOptions:{show: false, style:'circle'}}],
+            seriesColors: [ "#688F3E" ]
+        });
+
+        plot.defaultNumberTicks = numYAxisTicks;
+        return plot;
+
     }
 
 
@@ -443,18 +466,20 @@ function beforescript() {
         if (document.getElementById("pricehistory") != null) {
             for ( var listing in g_rgListingInfo ) {
                 var asset = g_rgListingInfo[listing].asset;
-                if ( typeof g_rgAssets[asset.appid][asset.contextid][asset.id].market_actions != 'undefined' )
-                {
-                    // add the context menu
-                    var elActionMenuButton = $J('<a></a>');
-                    elActionMenuButton.attr( 'id', 'listing_' + listing + '_actionmenu_button' );
-                    elActionMenuButton.addClass( 'market_actionmenu_button' );
-                    elActionMenuButton.attr( 'href', 'javascript:void(0)' );
-                    $J('#listing_' + listing + '_image').parent().append( elActionMenuButton );
+                if (typeof asset != 'undefined') {
+                    if ( typeof g_rgAssets[asset.appid][asset.contextid][asset.id].market_actions != 'undefined' )
+                    {
+                        // add the context menu
+                        var elActionMenuButton = $J('<a></a>');
+                        elActionMenuButton.attr( 'id', 'listing_' + listing + '_actionmenu_button' );
+                        elActionMenuButton.addClass( 'market_actionmenu_button' );
+                        elActionMenuButton.attr( 'href', 'javascript:void(0)' );
+                        $J('#listing_' + listing + '_image').parent().append( elActionMenuButton );
 
-                    $J(elActionMenuButton).click( $J.proxy( function( elButton, rgAsset ) {
-                        HandleMarketActionMenu( elButton.attr( 'id' ), g_rgAssets[rgAsset.appid][rgAsset.contextid][rgAsset.id] );
-                    }, null, elActionMenuButton, asset ) );
+                        $J(elActionMenuButton).click( $J.proxy( function( elButton, rgAsset ) {
+                            HandleMarketActionMenu( elButton.attr( 'id' ), g_rgAssets[rgAsset.appid][rgAsset.contextid][rgAsset.id] );
+                        }, null, elActionMenuButton, asset ) );
+                    }
                 }
             }
         }
@@ -497,34 +522,34 @@ function beforescript() {
             return false;
         }
     }
-    
+
     ItemActivityTicker.Load =  function() {
         // overwrite currency selection
-		$J.ajax( {
-			url: 'http://steamcommunity.com/market/itemordersactivity',
-			type: 'GET',
-			data: {
-				country: g_strCountryCode,
-				language: g_strLanguage,
-				currency: $J("#currency_buyorder").val() || (typeof( g_rgWalletInfo ) != 'undefined' && g_rgWalletInfo['wallet_currency'] != 0 ? g_rgWalletInfo['wallet_currency'] : 1),
-				item_nameid: this.m_llItemNameID || itemid,
-				two_factor: BIsTwoFactorEnabled() ? 1 : 0
-			}
-		} ).fail( function( jqxhr ) {
-			setTimeout( function() { ItemActivityTicker.Load(); }, 10000 );
-		} ).done( function( data ) {
-			setTimeout( function() { ItemActivityTicker.Load(); }, 10000 );
-			if ( data.success == 1 )
-			{
-				if ( data.timestamp > ItemActivityTicker.m_nTimeLastLoaded )
-				{
-					ItemActivityTicker.m_nTimeLastLoaded = data.timestamp;
-					ItemActivityTicker.Update( data.activity );
-				}
-			}
-		} );
-	}
-    
+        $J.ajax( {
+            url: 'http://steamcommunity.com/market/itemordersactivity',
+            type: 'GET',
+            data: {
+                country: g_strCountryCode,
+                language: g_strLanguage,
+                currency: $J("#currency_buyorder").val() || (typeof( g_rgWalletInfo ) != 'undefined' && g_rgWalletInfo['wallet_currency'] != 0 ? g_rgWalletInfo['wallet_currency'] : 1),
+                item_nameid: this.m_llItemNameID || itemid,
+                two_factor: BIsTwoFactorEnabled() ? 1 : 0
+            }
+        } ).fail( function( jqxhr ) {
+            setTimeout( function() { ItemActivityTicker.Load(); }, 10000 );
+        } ).done( function( data ) {
+            setTimeout( function() { ItemActivityTicker.Load(); }, 10000 );
+            if ( data.success == 1 )
+            {
+                if ( data.timestamp > ItemActivityTicker.m_nTimeLastLoaded )
+                {
+                    ItemActivityTicker.m_nTimeLastLoaded = data.timestamp;
+                    ItemActivityTicker.Update( data.activity );
+                }
+            }
+        } );
+    }
+
     addJS_Node(CreatePriceHistoryGraph);
     addJS_Node(pricehistory_zoomMonthOrLifetime);
     addJS_Node(InstallMarketActionMenuButtons);
