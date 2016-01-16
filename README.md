@@ -15,11 +15,12 @@ Better Buy Orders can be installed using <a href="https://chrome.google.com/webs
 After you install the appropriate extension, just click <a href="https://github.com/Step7750/BetterBuyOrders/raw/master/master.user.js">here</a> and follow the install instructions
 
 # Features
-As of v1.3
+As of v1.4
 * Extend the amount of buy and sell orders seen
 * Works on commodity, items, and pages with nothing listed
 * Allows "hot swapping" of currencies for the tables
 * Place buy orders on items without any listings
+* Price history graphs now appear on pages with no listings
 
 #Changelog
 
@@ -49,6 +50,11 @@ v1.3.1
 
 v1.3.2
 * The "Activity Feed" on commodity items now reflects the currency selected
+
+v1.4
+* Price history graphs now display on items with no listings
+* Added the functionality to place a buy order on items that don't have any current buy orders and have no listings
+* **NOTE**: Items that have never been sold on the market do not appear to have the ability to have buy orders placed on them (ex. ★ StatTrak Shadow Daggers | Night (Factory New))
 
 #Suggestions/Bugs
 
