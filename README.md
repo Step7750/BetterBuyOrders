@@ -9,18 +9,18 @@ BBO is a little script this extends the functionality of the "Buy Orders" system
 As of v1.3, BBO also allows all of these features on item pages and implements the ability to put buy orders on pages that have no items (very rare items etc...)
 
 # How to Install
-
-Better Buy Orders can be installed using <a href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=en">Tampermonkey</a> on Google Chrome or <a href="https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/">Greasemonkey</a> on Mozilla Firefox (other browsers have not been tested)
-
-After you install the appropriate extension, just click <a href="https://github.com/Step7750/BetterBuyOrders/raw/master/master.user.js">here</a> and follow the install instructions
+<a href="https://chrome.google.com/webstore/detail/better-buy-orders/fdohejjlbpikihghncmaejajdbpoiebj">If you have Google Chrome, you can install the up-to-date extension here</a>
+ 
+Better Buy Orders (script v1.4) can be installed on Firefox using <a href="https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/">Greasemonkey</a> on Mozilla Firefox. After you install Greasemonkey extension, just click <a href="https://github.com/Step7750/BetterBuyOrders/raw/master/master.user.js">here</a> and follow the install instructions
 
 # Features
-As of v1.4
+As of v1.5
 * Extend the amount of buy and sell orders seen
 * Works on commodity, items, and pages with nothing listed
 * Allows "hot swapping" of currencies for the tables
 * Place buy orders on items without any listings
 * Price history graphs now appear on pages with no listings
+* Auto-complete market search bar
 
 #Changelog
 
@@ -55,6 +55,12 @@ v1.4
 * Price history graphs now display on items with no listings
 * Added the functionality to place a buy order on items that don't have any current buy orders and have no listings
 * **NOTE**: Items that have never been sold on the market do not appear to have the ability to have buy orders placed on them (ex. ★ StatTrak Shadow Daggers | Night (Factory New))
+
+v1.5
+* Auto-complete market search bar that works on items that are and aren't listed on the market
+
+v1.5.1
+* Fixed HTTPS issue on the front market page for the search bar
 
 #Suggestions/Bugs
 
