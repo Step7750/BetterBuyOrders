@@ -58,6 +58,7 @@ v1.4
 
 v1.4.1
 * Implemented prompt for Chrome users to upgrade to the extension version (that is maintained)
+* **End of support for the Userscript**
 
 v1.5
 * Auto-complete market search bar that works on items that are and aren't listed on the market
