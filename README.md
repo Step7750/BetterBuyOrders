@@ -56,6 +56,9 @@ v1.4
 * Added the functionality to place a buy order on items that don't have any current buy orders and have no listings
 * **NOTE**: Items that have never been sold on the market do not appear to have the ability to have buy orders placed on them (ex. ★ StatTrak Shadow Daggers | Night (Factory New))
 
+v1.4.1
+* Implemented prompt for Chrome users to upgrade to the extension version (that is maintained)
+
 v1.5
 * Auto-complete market search bar that works on items that are and aren't listed on the market
 
