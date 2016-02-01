@@ -66,6 +66,9 @@ v1.5
 v1.5.1
 * Fixed HTTPS issue on the front market page for the search bar
 
+v1.5.2
+* Fixed bug that would sometimes prevent proper loading of the autocomplete search bar on pages with no listings
+
 #Suggestions/Bugs
 
 Are you encountering a bug or have a suggestion? Please use the available Github panel or contact me on <a href="http://steamcommunity.com/id/Step7750/">Steam</a>
