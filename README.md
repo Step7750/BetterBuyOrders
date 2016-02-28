@@ -69,6 +69,9 @@ v1.5.1
 v1.5.2
 * Fixed bug that would sometimes prevent proper loading of the autocomplete search bar on pages with no listings
 
+v1.5.3
+* Updated the item list to include the new "Wildfire" case for the autocomplete search bar
+
 #Suggestions/Bugs
 
 Are you encountering a bug or have a suggestion? Please use the available Github panel or contact me on <a href="http://steamcommunity.com/id/Step7750/">Steam</a>
