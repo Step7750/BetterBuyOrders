@@ -72,6 +72,9 @@ v1.5.2
 v1.5.3
 * Updated the item list to include the new "Wildfire" case for the autocomplete search bar
 
+v1.5.4
+* Fixed version control issue
+
 #Suggestions/Bugs
 
 Are you encountering a bug or have a suggestion? Please use the available Github panel or contact me on <a href="http://steamcommunity.com/id/Step7750/">Steam</a>
