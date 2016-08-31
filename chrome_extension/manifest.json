@@ -1,0 +1,36 @@
+{
+    "manifest_version": 2,
+    "content_scripts": [{
+        "js":               ["bbo.js"],
+        "css":              ["bbo.css"],
+        "matches":          ["http://steamcommunity.com/market/",
+                            "https://steamcommunity.com/market/",
+                            "http://steamcommunity.com/market/listings/*",
+                            "https://steamcommunity.com/market/listings/*",
+                            "http://*.steamcommunity.com/market/",
+                            "https://*.steamcommunity.com/market/",
+                            "http://*.steamcommunity.com/market/listings/*",
+                            "https://*.steamcommunity.com/market/listings/*"],
+        "run_at": "document_start"
+    }],
+    "permissions": [
+        "http://steamcommunity.com/market/",
+        "https://steamcommunity.com/market/",
+        "http://steamcommunity.com/market/listings/*",
+        "https://steamcommunity.com/market/listings/*",
+        "http://*.steamcommunity.com/market/",
+        "https://*.steamcommunity.com/market/",
+        "http://*.steamcommunity.com/market/listings/*",
+        "https://*.steamcommunity.com/market/listings/*"
+    ],
+    "icons": { "16": "16logo.png",
+               "48": "48logo.png",
+              "128": "128logo.png" },
+    "web_accessible_resources": [
+        "typeahead.bundle.min.js"
+    ],
+    "description":  "Improves Steam Community Market Buy Orders (auto-complete, extended listings, 'hot swap' currencies etc...)",
+    "name":         "Better Buy Orders",
+    "short_name":   "BBO",
+    "version":      "1.5.5"
+}
