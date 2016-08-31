@@ -2,7 +2,7 @@
 // @name       Better Buy Orders
 // @author     Stepan Fedorko-Bartos, Step7750
 // @namespace
-// @version    1.4.1
+// @version    1.4.2
 // @description  Improves Steam market buy orders (hot-swap view currency changing and extended listings)
 // @match      http://steamcommunity.com/market/listings/*
 // @match      https://steamcommunity.com/market/listings/*
