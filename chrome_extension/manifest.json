@@ -32,5 +32,5 @@
     "description":  "Improves Steam Community Market Buy Orders (auto-complete, extended listings, 'hot swap' currencies etc...)",
     "name":         "Better Buy Orders",
     "short_name":   "BBO",
-    "version":      "1.5.5"
+    "version":      "1.5.6"
 }

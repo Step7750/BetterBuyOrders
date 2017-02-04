@@ -51,9 +51,6 @@ function main_execute() {
 
       // bind event handler to currency selector
       $J('#currency_buyorder').on('change', function() {
-          if (typeof buyordertimeout !== 'undefined') {
-              clearTimeout(buyordertimeout);
-          }
           if ((ItemActivityTicker.m_llItemNameID != null && $J(".market_commodity_order_block").length > 0)) {
               Market_LoadOrderSpread(ItemActivityTicker.m_llItemNameID);
               // update item activity
@@ -96,7 +93,7 @@ function main_execute() {
 
     window.editeddom = 1;
 
-    console.log('%c Better Buy Orders (v1.5.5) by Step7750 ', 'background: #222; color: #fff;');
+    console.log('%c Better Buy Orders (v1.5.6) by Step7750 ', 'background: #222; color: #fff;');
     console.log('%c Changelog can be found here: https://github.com/Step7750/BetterBuyOrders', 'background: #222; color: #fff;');
 
     function addJS_Node (text, s_URL, funcToRun, runOnLoad) {
@@ -182,9 +179,6 @@ function beforescript() {
                     window.bbo_buy_enable = 1;
                     $J("#show_more_buy").children().eq(0).html('Show Less Orders <span class="popup_menu_pulldown_indicator" id="arrow_sell_button" style="-webkit-transform: rotate(-180deg); -ms-transform: rotate(-180deg); transform: rotate(-180deg);">');
                 }
-                if (typeof buyordertimeout !== 'undefined') {
-                    clearTimeout(buyordertimeout);
-                }
                 window.show_tables = 1;
                 Market_LoadOrderSpread(ItemActivityTicker.m_llItemNameID)
             });
@@ -198,9 +192,6 @@ function beforescript() {
                 else {
                     window.bbo_sell_enable = 1;
                     $J("#show_more_sell").children().eq(0).html('Show Less Orders <span class="popup_menu_pulldown_indicator" id="arrow_sell_button" style="-webkit-transform: rotate(-180deg); -ms-transform: rotate(-180deg); transform: rotate(-180deg);">');
-                }
-                if (typeof buyordertimeout !== 'undefined') {
-                    clearTimeout(buyordertimeout);
                 }
                 window.show_tables = 1;
                 // Updated the call to just show the tables if needed within the construction function
@@ -240,10 +231,7 @@ function beforescript() {
                 two_factor: BIsTwoFactorEnabled() ? 1 : 0
             }
         } ).error( function ( ) {
-            window.buyordertimeout = setTimeout( function() { Market_LoadOrderSpread( item_nameid ); }, 5000 );
         } ).success( function( data ) {
-            window.buyordertimeout = setTimeout( function() { Market_LoadOrderSpread( item_nameid ); }, 5000 );
-
             if ( data.success == 1 )
             {
                 // Better Buy Orders
@@ -277,7 +265,6 @@ function beforescript() {
 
                     // Bind the currency selector event handler
                     $J('#currency_buyorder').on('change', function() {
-                        clearTimeout(buyordertimeout);
                         if (itemid != null) {
                             Market_LoadOrderSpread(itemid);
                         }
