@@ -81,6 +81,13 @@ v1.5.5
 v1.5.6
 * Fixes needless `Market_LoadOrderSpread` calls after Valve's update
 
+
+### Userscript Hotfixes
+
+v1.4.2
+* Fixed a bug that would only allow you to place a buy order on CSGO items without any listings
+
+
 #Suggestions/Bugs
 
 Are you encountering a bug or have a suggestion? Please use the available Github panel or contact me on <a href="http://steamcommunity.com/id/Step7750/">Steam</a>
