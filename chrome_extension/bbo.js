@@ -81,19 +81,19 @@ function MainScript() {
       });
 
       // Start up the request if it is a commodity page
-      if (ItemActivityTicker.m_llItemNameID != null) {
+      if (ItemActivityTicker.m_llItemNameID) {
           Market_LoadOrderSpread(ItemActivityTicker.m_llItemNameID);
       }
 
 
-      if (ItemActivityTicker.m_llItemNameID != null) {
+      if (ItemActivityTicker.m_llItemNameID) {
           // Commodity Page
-          $J(".market_commodity_orders_interior").eq(1).append(BBO_GetOrderButton(0));
-          $J(".market_commodity_orders_interior").eq(0).append(BBO_GetOrderButton(1));
+          $J(".market_commodity_orders_interior").eq(1).append(BBO_GetOrderButton(BBO_BUY));
+          $J(".market_commodity_orders_interior").eq(0).append(BBO_GetOrderButton(BBO_SELL));
       }
       else {
           // Item Page
-          $J("#market_buyorder_info_details_tablecontainer").append(BBO_GetOrderButton(0));
+          $J("#market_buyorder_info_details_tablecontainer").append(BBO_GetOrderButton(BBO_BUY));
       }
     }
 
@@ -101,7 +101,7 @@ function MainScript() {
     addJS_Node("BBO_MainExecute();");
 
     console.log('%c Better Buy Orders (v1.6) by Step7750 ', 'background: #222; color: #fff;');
-    console.log('%c Changelog can be found here: https://github.com/Step7750/BetterBuyOrders', 'background: #222; color: #fff;');
+    console.log('%c Changelog can be found here: https://github.com/Step7750/BetterBuyOrders ', 'background: #222; color: #fff;');
 }
 
 function BeforeScript() {
@@ -124,7 +124,7 @@ function BeforeScript() {
                 $J(`#${btnId}`).children().eq(0).html('Show Less Orders <span class="popup_menu_pulldown_indicator" id="arrow_sell_button" style="-webkit-transform: rotate(-180deg); -ms-transform: rotate(-180deg); transform: rotate(-180deg);">');
             }
 
-            window.show_tables = true;
+            window.BBO_AnimateTables = true;
             Market_LoadOrderSpread(ItemActivityTicker.m_llItemNameID);
         });
     }
@@ -139,13 +139,15 @@ function BeforeScript() {
             window.itemid = item_nameid;
         }
 
+        const currency = $J("#currency_buyorder").val() || (g_rgWalletInfo && g_rgWalletInfo['wallet_currency']) || 1;
+
         $J.ajax( {
             url: window.location.protocol + '//steamcommunity.com/market/itemordershistogram',
             type: 'GET',
             data: {
                 country: g_strCountryCode,
                 language: g_strLanguage,
-                currency: $J("#currency_buyorder").val() || (typeof( g_rgWalletInfo ) != 'undefined' && g_rgWalletInfo['wallet_currency'] != 0 ? g_rgWalletInfo['wallet_currency'] : 1),
+                currency: currency,
                 item_nameid: item_nameid,
                 two_factor: BIsTwoFactorEnabled() ? 1 : 0
             }
@@ -197,11 +199,11 @@ function BeforeScript() {
 
                 for (var i = 0; i < quantity_buy_order.length; i++) {
                     // append to the buy order html, account for many currencies, languages
-                    buy_order_build_html += '<td align="right">' + data.price_prefix + quantity_buy_order[i][0].toFixed(2) + data.price_suffix + '</td><td align="right">' + quantity_buy_order[i][1] + '</td></tr><tr>';
+                    buy_order_build_html += '<td align="right">' + v_currencyformat(quantity_sell_order[i][0]*100, currency) + '</td><td align="right">' + quantity_buy_order[i][1] + '</td></tr><tr>';
                 }
                 for (var i = 0; i < quantity_sell_order.length; i++) {
                     // append to the buy order html, account for many currencies, languages
-                    sell_order_build_html += '<td align="right">' + data.price_prefix + quantity_sell_order[i][0].toFixed(2) + data.price_suffix + '</td><td align="right">' + quantity_sell_order[i][1] + '</td></tr><tr>';
+                    sell_order_build_html += '<td align="right">' + v_currencyformat(quantity_sell_order[i][0]*100, currency) + '</td><td align="right">' + quantity_sell_order[i][1] + '</td></tr><tr>';
                 }
 
                 // If there is only one buy order and the total is exact
@@ -250,14 +252,14 @@ function BeforeScript() {
 
 
                 // Create animations
-                if (window.show_tables) {
+                if (window.BBO_AnimateTables) {
                     if ($J("#market_commodity_buyreqeusts_table").is(":hidden")) {
                         $J("#market_commodity_buyreqeusts_table").hide().slideDown();
                     }
                     else {
                         $J("#market_commodity_forsale_table").hide().slideDown();
                     }
-                    window.show_tables = false;
+                    window.BBO_AnimateTables = false;
                 }
 
 
