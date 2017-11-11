@@ -1,17 +1,20 @@
 # Better Buy Orders
-Improves Steam market buy orders (hot-swap view different currencies and extended listings)
+Improves Steam Market Buy Orders (hot-swap view different currencies and extended listings)
 
 <img src="http://fat.gfycat.com/LiquidRelievedBarebirdbat.gif"></img>
+
 # What is it?
 
-BBO is a little script this extends the functionality of the "Buy Orders" system on the Steam Community Market. This script uses available data to extend the amount of buy and sell orders seen beyond the standard 5 rows. It also allows for you to quickly change the currency in which you view the buy order system in order to see the distribution of quantity more easily.
+BBO is an extension that extends the functionality of the "Buy Orders" system on the Steam Community Market. It uses available data to extend the amount of buy and sell orders seen beyond the standard 5 rows. It also allows for you to quickly change the currency in which you view the buy order system in order to see the distribution of quantity more easily.
 
 As of v1.3, BBO also allows all of these features on item pages and implements the ability to put buy orders on pages that have no items (very rare items etc...)
 
 # How to Install
 <a href="https://chrome.google.com/webstore/detail/better-buy-orders/fdohejjlbpikihghncmaejajdbpoiebj">If you have Google Chrome, you can install the up-to-date extension here</a>
- 
-Better Buy Orders (script v1.4) can be installed on Firefox using <a href="https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/">Greasemonkey</a> on Mozilla Firefox. After you install Greasemonkey extension, just click <a href="https://github.com/Step7750/BetterBuyOrders/raw/master/master.user.js">here</a> and follow the install instructions
+
+### UserScript
+
+The previous UserScript is deprecated and is therefore not in active development. As a result, it is no longer available in the repository.
 
 # Features
 As of v1.5
@@ -22,7 +25,7 @@ As of v1.5
 * Price history graphs now appear on pages with no listings
 * Auto-complete market search bar
 
-#Changelog
+# Changelog
 
 v1.0.
 * Initial Public Release
@@ -81,14 +84,13 @@ v1.5.5
 v1.5.6
 * Fixes needless `Market_LoadOrderSpread` calls after Valve's update
 
+v1.6
+* Fixes Language Parsing for Russian (and possibly others)
+* Refactors the codebase in accordance with Valve updates
+* Removes the item search autocomplete, since it would get outdated quickly and there isn't a reliable endpoint for dynamically updating it
+* Automatically parses available currencies from the page
 
-### Userscript Hotfixes
-
-v1.4.2
-* Fixed a bug that would only allow you to place a buy order on CSGO items without any listings
-
-
-#Suggestions/Bugs
+# Suggestions/Bugs
 
 Are you encountering a bug or have a suggestion? Please use the available Github panel or contact me on <a href="http://steamcommunity.com/id/Step7750/">Steam</a>
 
