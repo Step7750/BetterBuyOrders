@@ -1,14 +1,14 @@
 // Changelog can be found at: https://github.com/Step7750/BetterBuyOrders
 
 // We need to replace some page functions immediately after the body is loaded
-document.addEventListener("DOMContentLoaded", beforescript, false);
+document.addEventListener("DOMContentLoaded", BeforeScript, false);
 
-// Execute main_execute after full page load (added readyState for Mac systems)
+// Execute MainScript after full page load (added readyState for Mac systems)
 if (document.readyState == 'complete') {
-  main_execute();
+  MainScript();
 }
 else {
-  window.addEventListener ("load", main_execute, false);
+  window.addEventListener ("load", MainScript, false);
 }
 
 function addJS_Node(text, s_URL, funcToRun, runOnLoad) {
@@ -26,6 +26,7 @@ function addJS_Node(text, s_URL, funcToRun, runOnLoad) {
     targ.appendChild (scriptNode);
 }
 
+
 function BBO_GetCurrencySelector() {
     const select = $J('<select id="currency_buyorder" style="margin: 5px 0 5px 10px;">');
 
@@ -37,10 +38,23 @@ function BBO_GetCurrencySelector() {
     return select;
 }
 
-addJS_Node(BBO_GetCurrencySelector);
+function BBO_GetOrderButton(type) {
+    const id = (type === BBO_BUY) ? 'show_more_buy': 'show_more_sell';
 
-function main_execute() {
-    function dom_changes() {
+    return `
+        <center>
+            <div class="btn_grey_black btn_medium" id="${id}" style="margin-bottom: 10px;" onclick="BBO_toggleState(${type})">
+                <span>Show More Orders <span class="popup_menu_pulldown_indicator" id="arrow_buy_button"></span></span>
+            </div>
+        </center>
+    `;
+}
+
+addJS_Node(BBO_GetCurrencySelector);
+addJS_Node(BBO_GetOrderButton);
+
+function MainScript() {
+    function BBO_MainExecute() {
       if ($J(".market_commodity_order_block").length > 0) {
         // Injects the hot-swap currency selector for commodity items
         $J("#largeiteminfo_item_actions").show();
@@ -71,61 +85,48 @@ function main_execute() {
           Market_LoadOrderSpread(ItemActivityTicker.m_llItemNameID);
       }
 
-      // add toggle buttons for commodity or item pages
-      if (ItemActivityTicker.m_llItemNameID != null) {
-          // Toggle buttons
-          $J(".market_commodity_orders_interior").eq(1).append('<div class="btn_grey_black btn_medium" id="show_more_buy" style="margin-bottom: 10px;" onclick="toggle_state(0)"><span>Show More Orders <span class="popup_menu_pulldown_indicator" id="arrow_buy_button"></span></span></div>');
 
-          $J(".market_commodity_orders_interior").eq(0).append('<div class="btn_grey_black btn_medium" id="show_more_sell" style="margin-bottom: 10px;" onclick="toggle_state(1)"><span>Show More Orders <span class="popup_menu_pulldown_indicator" id="arrow_buy_button"></span></span></div>');
+      if (ItemActivityTicker.m_llItemNameID != null) {
+          // Commodity Page
+          $J(".market_commodity_orders_interior").eq(1).append(BBO_GetOrderButton(0));
+          $J(".market_commodity_orders_interior").eq(0).append(BBO_GetOrderButton(1));
       }
       else {
-          // buttons for item pages with listings
-          $J("#market_buyorder_info_details_tablecontainer").append('<center><div class="btn_grey_black btn_medium" id="show_more_buy" style="margin-bottom: 10px;" onclick="toggle_state(0)"><span>Show More Orders <span class="popup_menu_pulldown_indicator" id="arrow_buy_button"></span></span></div></center>');
+          // Item Page
+          $J("#market_buyorder_info_details_tablecontainer").append(BBO_GetOrderButton(0));
       }
     }
 
-    addJS_Node(dom_changes);
-    addJS_Node("dom_changes();");
+    addJS_Node(BBO_MainExecute);
+    addJS_Node("BBO_MainExecute();");
 
     console.log('%c Better Buy Orders (v1.6) by Step7750 ', 'background: #222; color: #fff;');
     console.log('%c Changelog can be found here: https://github.com/Step7750/BetterBuyOrders', 'background: #222; color: #fff;');
 }
 
-function beforescript() {
-    function toggle_state(type) {
+function BeforeScript() {
+    function BBO_toggleState(type) {
         // 0 = buy table, 1 = sell table
         // Called by the respective buttons
 
-        if (type == 0) {
-            // Valve's spelling error
-            $J("#market_commodity_buyreqeusts_table").slideUp('fast', function () {
-                if(window.bbo_buy_enable) {
-                    bbo_buy_enable = false;
-                    $J("#show_more_buy").children().eq(0).html('Show More Orders <span class="popup_menu_pulldown_indicator" id="arrow_sell_button">');
-                }
-                else {
-                    window.bbo_buy_enable = true;
-                    $J("#show_more_buy").children().eq(0).html('Show Less Orders <span class="popup_menu_pulldown_indicator" id="arrow_sell_button" style="-webkit-transform: rotate(-180deg); -ms-transform: rotate(-180deg); transform: rotate(-180deg);">');
-                }
-                window.show_tables = true;
-                Market_LoadOrderSpread(ItemActivityTicker.m_llItemNameID)
-            });
-        }
-        else {
-            $J("#market_commodity_forsale_table").slideUp('fast', function () {
-                if (window.bbo_sell_enable) {
-                    window.bbo_sell_enable = false;
-                    $J("#show_more_sell").children().eq(0).html('Show More Orders <span class="popup_menu_pulldown_indicator" id="arrow_sell_button">');
-                }
-                else {
-                    window.bbo_sell_enable = true;
-                    $J("#show_more_sell").children().eq(0).html('Show Less Orders <span class="popup_menu_pulldown_indicator" id="arrow_sell_button" style="-webkit-transform: rotate(-180deg); -ms-transform: rotate(-180deg); transform: rotate(-180deg);">');
-                }
-                window.show_tables = true;
-                // Updated the call to just show the tables if needed within the construction function
-                Market_LoadOrderSpread(ItemActivityTicker.m_llItemNameID)
-            });
-        }
+        const tableId = (type === BBO_BUY) ? 'market_commodity_buyreqeusts_table' : 'market_commodity_forsale_table';
+        const btnId = (type === BBO_BUY) ? 'show_more_buy' : 'show_more_sell';
+
+        $J(`#${tableId}`).slideUp('fast', () => {
+            const state = BBO_State[type];
+
+            BBO_State[type] = !state;
+
+            if (state) {
+                $J(`#${btnId}`).children().eq(0).html('Show More Orders <span class="popup_menu_pulldown_indicator" id="arrow_sell_button">');
+            }
+            else {
+                $J(`#${btnId}`).children().eq(0).html('Show Less Orders <span class="popup_menu_pulldown_indicator" id="arrow_sell_button" style="-webkit-transform: rotate(-180deg); -ms-transform: rotate(-180deg); transform: rotate(-180deg);">');
+            }
+
+            window.show_tables = true;
+            Market_LoadOrderSpread(ItemActivityTicker.m_llItemNameID);
+        });
     }
 
     // Overwrites Valve's function here: http://steamcommunity-a.akamaihd.net/public/javascript/market.js
@@ -234,13 +235,13 @@ function beforescript() {
                 // Overwrite the old table
                 $J('#market_commodity_forsale').html( data.sell_order_summary );
                 $J('#market_commodity_buyrequests').html( data.buy_order_summary );
-                if (data.buy_order_graph.length > 0 && window.bbo_buy_enable) {
+                if (data.buy_order_graph.length > 0 && BBO_State[BBO_BUY]) {
                     $J('#market_commodity_buyreqeusts_table').html( buy_order_build_html )
                 }
                 else {
                     $J('#market_commodity_buyreqeusts_table').html( data.buy_order_table );
                 }
-                if (data.sell_order_graph.length > 0 && window.bbo_sell_enable) {
+                if (data.sell_order_graph.length > 0 && BBO_State[BBO_SELL]) {
                     $J('#market_commodity_forsale_table').html(sell_order_build_html);
                 }
                 else {
@@ -261,7 +262,6 @@ function beforescript() {
 
 
                 // The rest of this function is just a copy and paste of some of the original code in this function by Valve
-
 
 
                 // set in the purchase dialog the default price to buy things (which should almost always be the price of the cheapest listed item)
@@ -372,8 +372,9 @@ function beforescript() {
       }
     }
 
+    addJS_Node('BBO_State = [false, false]; const BBO_BUY = 0, BBO_SELL = 1;');
     addJS_Node(Market_LoadOrderSpread);
-    addJS_Node(toggle_state);
+    addJS_Node(BBO_toggleState);
     addJS_Node(overrideItemActivityTickerLoad);
     addJS_Node("overrideItemActivityTickerLoad()");
 }
