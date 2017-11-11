@@ -17,13 +17,12 @@ As of v1.3, BBO also allows all of these features on item pages and implements t
 The previous UserScript is deprecated and is therefore not in active development. As a result, it is no longer available in the repository.
 
 # Features
-As of v1.5
+As of v1.6
 * Extend the amount of buy and sell orders seen
 * Works on commodity, items, and pages with nothing listed
 * Allows "hot swapping" of currencies for the tables
 * Place buy orders on items without any listings
 * Price history graphs now appear on pages with no listings
-* Auto-complete market search bar
 
 # Changelog
 
