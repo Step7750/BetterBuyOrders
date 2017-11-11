@@ -309,8 +309,6 @@ function BeforeScript() {
 
 
                 // The rest of this function is just a copy and paste of some of the original code in this function by Valve
-
-
                 // set in the purchase dialog the default price to buy things (which should almost always be the price of the cheapest listed item)
                 if ( data.lowest_sell_order && data.lowest_sell_order > 0 )
                     CreateBuyOrderDialog.m_nBestBuyPrice = data.lowest_sell_order;
@@ -335,6 +333,16 @@ function BeforeScript() {
                     $elOrdersHistogram.show();
                     var line1 = data.sell_order_graph;
                     var line2 = data.buy_order_graph;
+                    var numXAxisTicks = null;
+                    if ( $J(window).width() < 400 )
+                    {
+                        numXAxisTicks = 3;
+                    }
+                    else if ( $J(window).width() < 600 )
+                    {
+                        numXAxisTicks = 4;
+                    }
+
                     var numYAxisTicks = 11;
                     var strFormatPrefix = data.price_prefix;
                     var strFormatSuffix = data.price_suffix;
@@ -344,11 +352,12 @@ function BeforeScript() {
                         renderer: $J.jqplot.BarRenderer,
                         rendererOptions: {fillToZero: true},
                         title:{text: 'Buy and Sell Orders (cumulative)', textAlign: 'left' },
-                        gridPadding:{left: 45, right:45, top:30},
+                        gridPadding:{left: 45, right:45, top:45},
                         axesDefaults:{ showTickMarks:false },
                         axes:{
                             xaxis:{
                                 tickOptions:{formatString:strFormatPrefix + '%0.2f' + strFormatSuffix, labelPosition:'start', showMark: false},
+                                numberTicks: numXAxisTicks,
                                 min: data.graph_min_x,
                                 max: data.graph_max_x
                             },
@@ -361,9 +370,9 @@ function BeforeScript() {
                             }
                         },
                         grid: {
-                            gridLineColor: '#414141',
-                            borderColor: '#414141',
-                            background: '#262626'
+                            gridLineColor: '#1b2939',
+                            borderColor: '#1b2939',
+                            background: '#101822'
                         },
                         cursor: {
                             show: true,
