@@ -257,7 +257,7 @@ function BeforeScript() {
                     const r = /<span class="market_commodity_orders_header_promote">(\d+)<\/span>/;
                     const totalSellOrders = parseInt(data.sell_order_summary.match(r)[1]);
 
-                    // Figure out the "or less" text for the language chosen
+                    // Figure out the "or more" text for the language chosen
                     const rlang = /.*\d (.*)/;
 
                     const lastRowText = $J(data.sell_order_table).children("tbody").eq(0).children().last().children().eq(0).text();
