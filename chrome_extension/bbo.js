@@ -46,7 +46,7 @@ function main_execute() {
         $J("#largeiteminfo_item_actions").show();
         $J(".market_commodity_order_block").children().eq(1).after(BBO_GetCurrencySelector());
       }
-      else if ($J("#market_buyorder_info_details_tablecontainer").length > 0 && window.nolistings == 0) {
+      else if ($J("#market_buyorder_info_details_tablecontainer").length > 0) {
           // append the currency selector for weapon pages (with listings)
           $J("#market_buyorder_info_details_tablecontainer").prepend(BBO_GetCurrencySelector());
       }
@@ -78,7 +78,7 @@ function main_execute() {
 
           $J(".market_commodity_orders_interior").eq(0).append('<div class="btn_grey_black btn_medium" id="show_more_sell" style="margin-bottom: 10px;" onclick="toggle_state(1)"><span>Show More Orders <span class="popup_menu_pulldown_indicator" id="arrow_buy_button"></span></span></div>');
       }
-      else if (window.nolistings == 0) {
+      else {
           // buttons for item pages with listings
           $J("#market_buyorder_info_details_tablecontainer").append('<center><div class="btn_grey_black btn_medium" id="show_more_buy" style="margin-bottom: 10px;" onclick="toggle_state(0)"><span>Show More Orders <span class="popup_menu_pulldown_indicator" id="arrow_buy_button"></span></span></div></center>');
       }
@@ -86,8 +86,6 @@ function main_execute() {
 
     addJS_Node(dom_changes);
     addJS_Node("dom_changes();");
-
-    window.editeddom = 1;
 
     console.log('%c Better Buy Orders (v1.6) by Step7750 ', 'background: #222; color: #fff;');
     console.log('%c Changelog can be found here: https://github.com/Step7750/BetterBuyOrders', 'background: #222; color: #fff;');
@@ -101,49 +99,38 @@ function beforescript() {
         if (type == 0) {
             // Valve's spelling error
             $J("#market_commodity_buyreqeusts_table").slideUp('fast', function () {
-                if(window.bbo_buy_enable == 1) {
-                    bbo_buy_enable = 0;
+                if(window.bbo_buy_enable) {
+                    bbo_buy_enable = false;
                     $J("#show_more_buy").children().eq(0).html('Show More Orders <span class="popup_menu_pulldown_indicator" id="arrow_sell_button">');
                 }
                 else {
-                    window.bbo_buy_enable = 1;
+                    window.bbo_buy_enable = true;
                     $J("#show_more_buy").children().eq(0).html('Show Less Orders <span class="popup_menu_pulldown_indicator" id="arrow_sell_button" style="-webkit-transform: rotate(-180deg); -ms-transform: rotate(-180deg); transform: rotate(-180deg);">');
                 }
-                window.show_tables = 1;
+                window.show_tables = true;
                 Market_LoadOrderSpread(ItemActivityTicker.m_llItemNameID)
             });
         }
         else {
             $J("#market_commodity_forsale_table").slideUp('fast', function () {
-                if(window.bbo_sell_enable == 1) {
-                    window.bbo_sell_enable = 0;
+                if (window.bbo_sell_enable) {
+                    window.bbo_sell_enable = false;
                     $J("#show_more_sell").children().eq(0).html('Show More Orders <span class="popup_menu_pulldown_indicator" id="arrow_sell_button">');
                 }
                 else {
-                    window.bbo_sell_enable = 1;
+                    window.bbo_sell_enable = true;
                     $J("#show_more_sell").children().eq(0).html('Show Less Orders <span class="popup_menu_pulldown_indicator" id="arrow_sell_button" style="-webkit-transform: rotate(-180deg); -ms-transform: rotate(-180deg); transform: rotate(-180deg);">');
                 }
-                window.show_tables = 1;
+                window.show_tables = true;
                 // Updated the call to just show the tables if needed within the construction function
                 Market_LoadOrderSpread(ItemActivityTicker.m_llItemNameID)
             });
         }
     }
 
-    function escapeHtml(text) {
-        // escape any messed up item names (prevent cross scripting)
-        return text
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-
     // Overwrites Valve's function here: http://steamcommunity-a.akamaihd.net/public/javascript/market.js
     function Market_LoadOrderSpread(item_nameid)
     {
-        window.proccessed_order = 1;
         if (!item_nameid) {
             item_nameid = window.itemid;
         }
@@ -247,13 +234,13 @@ function beforescript() {
                 // Overwrite the old table
                 $J('#market_commodity_forsale').html( data.sell_order_summary );
                 $J('#market_commodity_buyrequests').html( data.buy_order_summary );
-                if (data.buy_order_graph.length > 0 && window.bbo_buy_enable == 1) {
+                if (data.buy_order_graph.length > 0 && window.bbo_buy_enable) {
                     $J('#market_commodity_buyreqeusts_table').html( buy_order_build_html )
                 }
                 else {
                     $J('#market_commodity_buyreqeusts_table').html( data.buy_order_table );
                 }
-                if (data.sell_order_graph.length > 0 && window.bbo_sell_enable == 1) {
+                if (data.sell_order_graph.length > 0 && window.bbo_sell_enable) {
                     $J('#market_commodity_forsale_table').html(sell_order_build_html);
                 }
                 else {
@@ -262,14 +249,14 @@ function beforescript() {
 
 
                 // Create animations
-                if (window.show_tables == 1) {
+                if (window.show_tables) {
                     if ($J("#market_commodity_buyreqeusts_table").is(":hidden")) {
                         $J("#market_commodity_buyreqeusts_table").hide().slideDown();
                     }
                     else {
                         $J("#market_commodity_forsale_table").hide().slideDown();
                     }
-                    window.show_tables = 0;
+                    window.show_tables = false;
                 }
 
 
@@ -356,7 +343,7 @@ function beforescript() {
         } );
     }
 
-    function inject_iat_load() {
+    function overrideItemActivityTickerLoad() {
       ItemActivityTicker.Load =  function() {
         // overwrite currency selection
         $J.ajax( {
@@ -385,10 +372,8 @@ function beforescript() {
       }
     }
 
-    addJS_Node("window.bbo_buy_enable = 0;window.bbo_sell_enable = 0;window.itemid = null;window.show_tables = 0;window.editeddom = 0;window.nolistings = 0;window.proccessed_order = 0;");
-    addJS_Node(escapeHtml);
     addJS_Node(Market_LoadOrderSpread);
     addJS_Node(toggle_state);
-    addJS_Node(inject_iat_load);
-    addJS_Node("inject_iat_load()");
+    addJS_Node(overrideItemActivityTickerLoad);
+    addJS_Node("overrideItemActivityTickerLoad()");
 }
