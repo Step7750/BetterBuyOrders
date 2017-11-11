@@ -139,7 +139,9 @@ function BeforeScript() {
             window.itemid = item_nameid;
         }
 
-        const currency = $J("#currency_buyorder").val() || (g_rgWalletInfo && g_rgWalletInfo['wallet_currency']) || 1;
+        const currency = parseInt($J("#currency_buyorder").val() || (g_rgWalletInfo && g_rgWalletInfo['wallet_currency']) || 1);
+        const strCode = Object.keys(g_rgCurrencyData).find((code) => g_rgCurrencyData[code].eCurrencyCode === currency);
+
 
         $J.ajax( {
             url: window.location.protocol + '//steamcommunity.com/market/itemordershistogram',
@@ -155,103 +157,145 @@ function BeforeScript() {
         } ).success( function( data ) {
             if ( data.success == 1 )
             {
+                $J('#market_commodity_forsale').html( data.sell_order_summary );
+                $J('#market_commodity_buyrequests').html( data.buy_order_summary );
+
                 // Better Buy Orders
 
                 // configure the initial table HTML
-                var buy_order_build_html = '<table class="market_commodity_orders_table"><tr>' + $J(data.buy_order_table).children("tbody").eq(0).children("tr").eq(0).html() + '</tr>';
-                var sell_order_build_html = '<table class="market_commodity_orders_table"><tr>' + $J(data.buy_order_table).children("tbody").eq(0).children("tr").eq(0).html() + '</tr>';
+                let buyOrderTable = '<table class="market_commodity_orders_table"><tr>' + $J(data.buy_order_table).children("tbody").eq(0).children("tr").eq(0).html() + '</tr>';
+                let sellOrderTable = '<table class="market_commodity_orders_table"><tr>' + $J(data.buy_order_table).children("tbody").eq(0).children("tr").eq(0).html() + '</tr>';
 
                 // Make an deep copy object that stores the quantity at each amount
-                var quantity_buy_order = $J.extend(true, [], data.buy_order_graph);
-                for (var i = 0; i < quantity_buy_order.length; i++) {
-                    var sum = 0
-                    for (var x = 0; x < i; x++) {
-                        sum += quantity_buy_order[x][1];
+                const buyOrderQuantity = $J.extend(true, [], data.buy_order_graph);
+
+                for (let i = 0; i < buyOrderQuantity.length; i++) {
+                    let sum = 0;
+
+                    for (let x = 0; x < i; x++) {
+                        sum += buyOrderQuantity[x][1];
                     }
-                    quantity_buy_order[i][1] -= sum;
+                    buyOrderQuantity[i][1] -= sum;
                 }
 
-                var quantity_sell_order = $J.extend(true, [], data.sell_order_graph);
+                const sellOrderQuantity = $J.extend(true, [], data.sell_order_graph);
 
-                for (var i = 0; i < quantity_sell_order.length; i++) {
-                    var sum = 0
-                    for (var x = 0; x < i; x++) {
-                        sum += quantity_sell_order[x][1];
+                for (let i = 0; i < sellOrderQuantity.length; i++) {
+                    let sum = 0;
+                    for (let x = 0; x < i; x++) {
+                        sum += sellOrderQuantity[x][1];
                     }
-                    quantity_sell_order[i][1] -= sum;
+                    sellOrderQuantity[i][1] -= sum;
                 }
 
-                // Remove the button if there aren't actually more than 6 buy orders of different value
-                if (quantity_buy_order.length <=  6) {
+                // Append table rows for quantity
+                for (let i = 0; i < buyOrderQuantity.length; i++) {
+                    // append to the buy order html, account for many currencies, languages
+                    buyOrderTable += `
+                        <tr>
+                            <td align="right">${v_currencyformat(buyOrderQuantity[i][0]*100, strCode)}</td>
+                            <td align="right">${buyOrderQuantity[i][1]}</td>
+                        </tr>`;
+                }
+
+                for (let i = 0; i < sellOrderQuantity.length; i++) {
+                    sellOrderTable += `
+                        <tr>
+                            <td align="right">${v_currencyformat(sellOrderQuantity[i][0]*100, strCode)}</td>
+                            <td align="right">${sellOrderQuantity[i][1]}</td>
+                        </tr>`;
+                }
+
+                // Remove the buttons if there aren't actually more than 6 buy orders of different value
+                if (buyOrderQuantity.length <=  6) {
                     $J("#show_more_buy").hide();
                 }
-                else if (quantity_buy_order.length >  6) {
+                else if (buyOrderQuantity.length >  6) {
                     $J("#show_more_buy").show();
                 }
 
-                if (quantity_sell_order.length <=  6) {
+                if (sellOrderQuantity.length <=  6) {
                     $J("#show_more_sell").hide();
                 }
-                else if (quantity_sell_order.length >  6) {
+                else if (sellOrderQuantity.length >  6) {
                     $J("#show_more_sell").show();
                 }
 
+                // Get the total amount of shown by orders
+                const totalShownBuyOrders = (data.buy_order_graph.length > 0) ?
+                    data.buy_order_graph[data.buy_order_graph.length - 1][1] : 0;
+                const totalShownSellOrders = (data.sell_order_graph.length > 0) ?
+                    data.sell_order_graph[data.sell_order_graph.length - 1][1] : 0;
 
-                for (var i = 0; i < quantity_buy_order.length; i++) {
-                    // append to the buy order html, account for many currencies, languages
-                    buy_order_build_html += '<td align="right">' + v_currencyformat(quantity_sell_order[i][0]*100, currency) + '</td><td align="right">' + quantity_buy_order[i][1] + '</td></tr><tr>';
-                }
-                for (var i = 0; i < quantity_sell_order.length; i++) {
-                    // append to the buy order html, account for many currencies, languages
-                    sell_order_build_html += '<td align="right">' + v_currencyformat(quantity_sell_order[i][0]*100, currency) + '</td><td align="right">' + quantity_sell_order[i][1] + '</td></tr><tr>';
-                }
-
-                // If there is only one buy order and the total is exact
-                var total_shown_buy_orders = null;
-                var total_shown_sell_orders = null;
-                if (data.buy_order_graph.length > 0) {
-                    total_shown_buy_orders = data.buy_order_graph[data.buy_order_graph.length - 1][1];
-                }
-                if (data.sell_order_graph.length > 0) {
-                    total_shown_sell_orders = data.sell_order_graph[data.sell_order_graph.length - 1][1];
-                }
-
-                if ((data.buy_order_summary).search(total_shown_buy_orders) == -1 && data.buy_order_graph.length > 0) {
+                if ((data.buy_order_summary).search(totalShownBuyOrders) === -1 && data.buy_order_graph.length > 0) {
                     // Not all of the possible listings are shown, put the "or more" tag and calculate the remaining orders
                     // Get the total amount of buy listings
-                    var totallistings = $J(data.buy_order_summary.replace("Ceny ", "")).text().split(" ")[0];
+                    const r = /<span class="market_commodity_orders_header_promote">(\d+)<\/span>/;
+                    const totalBuyOrders = parseInt(data.buy_order_summary.match(r)[1]);
 
-                    // Update for localization, get the "or more" or "or less" text from the response rather than hard coding in english
-                    var orless = $J(data.buy_order_table).children("tbody").eq(0).children().last().children().eq(0).text().replace(data.price_prefix, "").replace(data.price_suffix, "").replace(/\d+([,.]\d+)?/, "").trim();
-                    buy_order_build_html += '<td align="right">' + data.price_prefix + (quantity_buy_order[quantity_buy_order.length - 1][0] - 0.01).toFixed(2) + data.price_suffix + ' ' + orless + '</td><td align="right">' + (totallistings - total_shown_buy_orders) + '</td></tr><tr>';
+                    // Figure out the "or less" text for the language chosen
+                    const rlang = /.*\d (.*)/;
+
+                    const lastRowText = $J(data.buy_order_table).children("tbody").eq(0).children().last().children().eq(0).text();
+                    const orLessText = lastRowText.match(rlang)[1];
+
+                    buyOrderTable += `
+                        <tr>
+                            <td align="right">
+                                ${v_currencyformat(buyOrderQuantity[buyOrderQuantity.length - 1][0]*100 - 1, strCode)} ${orLessText}
+                            </td>
+                            <td align="right">
+                                ${totalBuyOrders - totalShownBuyOrders}
+                            </td>
+                        </tr>
+                    `;
                 }
-                if ((data.sell_order_summary).search(total_shown_sell_orders) == -1 && data.sell_order_graph.length > 0) {
+
+                if ((data.sell_order_summary).search(totalShownSellOrders) == -1 && data.sell_order_graph.length > 0) {
                     // Not all of the possible listings are shown, put the "or more" tag and calculate the remaining orders
                     // Get total amount of buy listings
-                    var totallistings = $J(data.sell_order_summary.replace("Ceny ", "")).text().split(" ")[0];
+                    const r = /<span class="market_commodity_orders_header_promote">(\d+)<\/span>/;
+                    const totalSellOrders = parseInt(data.sell_order_summary.match(r)[1]);
 
-                    var ormore = $J(data.sell_order_table).children("tbody").eq(0).children().last().children().eq(0).text().replace(data.price_prefix, "").replace(data.price_suffix, "").replace(/\d+([,.]\d+)?/, "").trim();
-                    sell_order_build_html += '<td align="right">' + data.price_prefix + (quantity_sell_order[quantity_sell_order.length - 1][0] + 0.01).toFixed(2) + data.price_suffix + ' ' + ormore + '</td><td align="right">' + (totallistings - total_shown_sell_orders) + '</td></tr><tr>';
+                    // Figure out the "or less" text for the language chosen
+                    const rlang = /.*\d (.*)/;
+
+                    const lastRowText = $J(data.sell_order_table).children("tbody").eq(0).children().last().children().eq(0).text();
+                    const orMoreText = lastRowText.match(rlang)[1];
+
+                    sellOrderTable += `
+                        <tr>
+                            <td align="right">
+                                ${v_currencyformat(sellOrderQuantity[sellOrderQuantity.length - 1][0]*100 + 1, strCode)} ${orMoreText}
+                            </td>
+                            <td align="right">
+                                ${totalSellOrders - totalShownSellOrders}
+                            </td>
+                        </tr>
+                    `;
                 }
-                sell_order_build_html += '</table>', buy_order_build_html += '</table>';
-                // Overwrite the old table
-                $J('#market_commodity_forsale').html( data.sell_order_summary );
-                $J('#market_commodity_buyrequests').html( data.buy_order_summary );
+
+                sellOrderTable += '</table>';
+                buyOrderTable += '</table>';
+
+
+                // Overwrite the old tables if chosen
                 if (data.buy_order_graph.length > 0 && BBO_State[BBO_BUY]) {
-                    $J('#market_commodity_buyreqeusts_table').html( buy_order_build_html )
+                    $J('#market_commodity_buyreqeusts_table').html(buyOrderTable)
                 }
                 else {
-                    $J('#market_commodity_buyreqeusts_table').html( data.buy_order_table );
+                    $J('#market_commodity_buyreqeusts_table').html(data.buy_order_table);
                 }
+
                 if (data.sell_order_graph.length > 0 && BBO_State[BBO_SELL]) {
-                    $J('#market_commodity_forsale_table').html(sell_order_build_html);
+                    $J('#market_commodity_forsale_table').html(sellOrderTable);
                 }
                 else {
                     $J('#market_commodity_forsale_table').html(data.sell_order_table);
                 }
 
 
-                // Create animations
+                // Check if we need to animate a table into existence
                 if (window.BBO_AnimateTables) {
                     if ($J("#market_commodity_buyreqeusts_table").is(":hidden")) {
                         $J("#market_commodity_buyreqeusts_table").hide().slideDown();
@@ -259,6 +303,7 @@ function BeforeScript() {
                     else {
                         $J("#market_commodity_forsale_table").hide().slideDown();
                     }
+
                     window.BBO_AnimateTables = false;
                 }
 
@@ -347,6 +392,8 @@ function BeforeScript() {
 
     function overrideItemActivityTickerLoad() {
       ItemActivityTicker.Load =  function() {
+        const currency = $J("#currency_buyorder").val() || (g_rgWalletInfo && g_rgWalletInfo['wallet_currency']) || 1;
+
         // overwrite currency selection
         $J.ajax( {
             url: 'http://steamcommunity.com/market/itemordersactivity',
@@ -354,7 +401,7 @@ function BeforeScript() {
             data: {
                 country: g_strCountryCode,
                 language: g_strLanguage,
-                currency: ($J("#currency_buyorder").val()) || (typeof( g_rgWalletInfo ) != 'undefined' && g_rgWalletInfo['wallet_currency'] != 0 ? g_rgWalletInfo['wallet_currency'] : 1),
+                currency: currency,
                 item_nameid: this.m_llItemNameID || itemid,
                 two_factor: BIsTwoFactorEnabled() ? 1 : 0
             }
