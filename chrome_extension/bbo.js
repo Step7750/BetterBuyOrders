@@ -3,7 +3,7 @@
 // We need to replace some page functions immediately after the body is loaded
 document.addEventListener("DOMContentLoaded", beforescript, false);
 
-// Execute main_execute after full page load (added readyState for Mac systems etc...)
+// Execute main_execute after full page load (added readyState for Mac systems)
 if (document.readyState == 'complete') {
   main_execute();
 }
@@ -52,16 +52,16 @@ function main_execute() {
       }
 
       // set the proper value for the currency selector
-      $J("#currency_buyorder").val(typeof( g_rgWalletInfo ) != 'undefined' && g_rgWalletInfo['wallet_currency'] != 0 ? g_rgWalletInfo['wallet_currency'] : 1);
+      $J("#currency_buyorder").val((g_rgWalletInfo && g_rgWalletInfo['wallet_currency']) || 1);
 
       // bind event handler to currency selector
       $J('#currency_buyorder').on('change', function() {
-          if ((ItemActivityTicker.m_llItemNameID != null && $J(".market_commodity_order_block").length > 0)) {
+          if ((ItemActivityTicker.m_llItemNameID && $J(".market_commodity_order_block").length > 0)) {
               Market_LoadOrderSpread(ItemActivityTicker.m_llItemNameID);
               // update item activity
               ItemActivityTicker.Load();
           }
-          else if ($J("#market_buyorder_info_details_tablecontainer").length > 0 && itemid != null) {
+          else if ($J("#market_buyorder_info_details_tablecontainer").length > 0 && itemid) {
               Market_LoadOrderSpread(itemid);
           }
       });
@@ -141,15 +141,16 @@ function beforescript() {
     }
 
     // Overwrites Valve's function here: http://steamcommunity-a.akamaihd.net/public/javascript/market.js
-    function Market_LoadOrderSpread( item_nameid )
+    function Market_LoadOrderSpread(item_nameid)
     {
         window.proccessed_order = 1;
-        if (item_nameid == null) {
+        if (!item_nameid) {
             item_nameid = window.itemid;
         }
         else {
             window.itemid = item_nameid;
         }
+
         $J.ajax( {
             url: window.location.protocol + '//steamcommunity.com/market/itemordershistogram',
             type: 'GET',
@@ -166,40 +167,6 @@ function beforescript() {
             {
                 // Better Buy Orders
 
-                if (document.getElementById("market_commodity_buyrequests") == null && ItemActivityTicker.m_llItemNameID == null) {
-                    // set that we have a item with no listings (to prevent other dom manipulations)
-                    if (window.nolistings == 0) {
-                        $J("#pricehistory").css("margin-bottom", "10px");
-                        $J("#searchResultsTable").append('<div class="zoom_controls pricehistory_zoom_controls" style="margin-bottom: 10px; margin-top: 10px;">Zoom graph<a class="zoomopt" onclick="return pricehistory_zoomDays( g_plotPriceHistory, g_timePriceHistoryEarliest, g_timePriceHistoryLatest, 7 );" href="javascript:void(0)">Week</a><a class="zoomopt" onclick="return pricehistory_zoomDays( g_plotPriceHistory, g_timePriceHistoryEarliest, g_timePriceHistoryLatest, 30 );" href="javascript:void(0)">Month</a><a class="zoomopt" onclick="return pricehistory_zoomLifetime( g_plotPriceHistory, g_timePriceHistoryEarliest, g_timePriceHistoryLatest );" href="javascript:void(0)" style="padding-right: 0">Lifetime</a></div>')
-                    }
-                    window.nolistings = 1;
-
-                    // need to clear the waiting dialog
-                    $J("#market_buyorder_info").remove();
-
-                    // need to find out the item name and append it
-                    // We're escaping the text jic Valve changes how they escape the specific area where we get the item name (prevent xss)
-                    var itemname = escapeHtml('"' + $J(".market_listing_nav a").eq(1).text().replace("★", "\\u2605").replace("™", "\\u2122") + '"');
-
-                    // We want to get the appid for this page
-                    var appid = 730;
-                    if (Object.keys(g_rgAppContextData).length > 0) {
-                    	appid = Object.keys(g_rgAppContextData)[0];
-                    }
-
-                    $J("#searchResultsTable").prepend('<div id="market_buyorder_info" class="market_listing_row"><div><div style="float: right"><a class="btn_green_white_innerfade btn_medium" href="javascript:void(0)" onclick="Market_ShowBuyOrderPopup(' + appid + ', ' + itemname + ', ' + itemname + '); return false;"><span>Place buy order...</span></a></div><div id="market_commodity_buyrequests"><span class="market_commodity_orders_header_promote">NULL</span> requests to buy at <span class="market_commodity_orders_header_promote">NULL</span> or lower</div></div><div id="market_buyorder_info_show_details"><span onclick="$J(\'#market_buyorder_info_show_details\').hide(); $J(\'#market_buyorder_info_details\').show();"> View more details </span></div><div id="market_buyorder_info_details" style="display: none;"><div id="market_buyorder_info_details_tablecontainer" style="padding-left: 10px; padding-right: 15px;"><div id="market_commodity_buyreqeusts_table" class="market_commodity_orders_table_container"></div><center><div class="btn_grey_black btn_medium" id="show_more_buy" style="margin-bottom: 10px;" onclick="toggle_state(0)"><span>Show More Orders <span class="popup_menu_pulldown_indicator" id="arrow_buy_button"></span></span></div></center></div><div id="market_buyorder_info_details_explanation"><p>You can place an order to buy at a specific price, and the cheapest listing will automatically get matched to the highest buy order.</p><p>For this item, buy orders will be matched with the cheapest option to buy regardless of any unique characteristics.</p><p>If you\'re looking for a specific characteristic, you can search or view the individual listings below.</p></div></div></div>')
-
-                    // append and configure the currency selector
-                    $J("#market_buyorder_info_details_tablecontainer").prepend('<select id="currency_buyorder" style="margin-left: 5px; margin-top: 10px;"><option value="1" selected>USD</option><option value="2">GBP</option><option value="3">EUR</option><option value="5">RUB</option><option value="7">BRL</option><option value="8">JPY</option><option value="9">NOK</option><option value="10">IDR</option><option value="11">MYR</option><option value="12">PHP</option><option value="13">SGD</option><option value="14">THB</option><option value="15">VND</option><option value="16">KRW</option><option value="17">TRY</option><option value="18">UAH</option><option value="19">MXN</option><option value="20">CAD</option><option value="21">AUD</option><option value="22">NZD</option></select>');
-                    $J("#currency_buyorder").val(typeof( g_rgWalletInfo ) != 'undefined' && g_rgWalletInfo['wallet_currency'] != 0 ? g_rgWalletInfo['wallet_currency'] : 1);
-
-                    // Bind the currency selector event handler
-                    $J('#currency_buyorder').on('change', function() {
-                        if (itemid != null) {
-                            Market_LoadOrderSpread(itemid);
-                        }
-                    });
-                }
                 // configure the initial table HTML
                 var buy_order_build_html = '<table class="market_commodity_orders_table"><tr>' + $J(data.buy_order_table).children("tbody").eq(0).children("tr").eq(0).html() + '</tr>';
                 var sell_order_build_html = '<table class="market_commodity_orders_table"><tr>' + $J(data.buy_order_table).children("tbody").eq(0).children("tr").eq(0).html() + '</tr>';
