@@ -89,6 +89,9 @@ v1.6
 * Removes the item search autocomplete, since it would get outdated quickly and there isn't a reliable endpoint for dynamically updating it
 * Automatically parses available currencies from the page
 
+v1.6.1
+* Fixes bug with displaying currencies with subsequent symbols (EUR, 0,60€ or more)
+
 # Suggestions/Bugs
 
 Are you encountering a bug or have a suggestion? Please use the available Github panel or contact me on <a href="http://steamcommunity.com/id/Step7750/">Steam</a>
