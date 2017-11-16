@@ -100,7 +100,7 @@ function MainScript() {
     addJS_Node(BBO_MainExecute);
     addJS_Node("BBO_MainExecute();");
 
-    console.log('%c Better Buy Orders (v1.6) by Step7750 ', 'background: #222; color: #fff;');
+    console.log('%c Better Buy Orders (v1.6.1) by Step7750 ', 'background: #222; color: #fff;');
     console.log('%c Changelog can be found here: https://github.com/Step7750/BetterBuyOrders ', 'background: #222; color: #fff;');
 }
 
@@ -234,7 +234,7 @@ function BeforeScript() {
                     const totalBuyOrders = parseInt(data.buy_order_summary.match(r)[1]);
 
                     // Figure out the "or less" text for the language chosen
-                    const rlang = /.*\d (.*)/;
+                    const rlang = /.*\d\S? (.*)/;
 
                     const lastRowText = $J(data.buy_order_table).children("tbody").eq(0).children().last().children().eq(0).text();
                     const orLessText = lastRowText.match(rlang)[1];
@@ -258,7 +258,7 @@ function BeforeScript() {
                     const totalSellOrders = parseInt(data.sell_order_summary.match(r)[1]);
 
                     // Figure out the "or more" text for the language chosen
-                    const rlang = /.*\d (.*)/;
+                    const rlang = /.*\d\S? (.*)/;
 
                     const lastRowText = $J(data.sell_order_table).children("tbody").eq(0).children().last().children().eq(0).text();
                     const orMoreText = lastRowText.match(rlang)[1];
