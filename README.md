@@ -92,6 +92,9 @@ v1.6
 v1.6.1
 * Fixes bug with displaying currencies with subsequent symbols (EUR, 0,60€ or more)
 
+v1.6.2
+* Fixes bug with displaying the buyorder table when not logged into Steam
+
 # Suggestions/Bugs
 
 Are you encountering a bug or have a suggestion? Please use the available Github panel or contact me on <a href="http://steamcommunity.com/id/Step7750/">Steam</a>

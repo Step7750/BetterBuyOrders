@@ -66,7 +66,7 @@ function MainScript() {
       }
 
       // set the proper value for the currency selector
-      $J("#currency_buyorder").val((g_rgWalletInfo && g_rgWalletInfo['wallet_currency']) || 1);
+      $J("#currency_buyorder").val((typeof g_rgWalletInfo !== 'undefined' && g_rgWalletInfo['wallet_currency']) || 1);
 
       // bind event handler to currency selector
       $J('#currency_buyorder').on('change', function() {
@@ -100,7 +100,7 @@ function MainScript() {
     addJS_Node(BBO_MainExecute);
     addJS_Node("BBO_MainExecute();");
 
-    console.log('%c Better Buy Orders (v1.6.1) by Step7750 ', 'background: #222; color: #fff;');
+    console.log('%c Better Buy Orders (v1.6.2) by Step7750 ', 'background: #222; color: #fff;');
     console.log('%c Changelog can be found here: https://github.com/Step7750/BetterBuyOrders ', 'background: #222; color: #fff;');
 }
 
@@ -139,7 +139,7 @@ function BeforeScript() {
             window.itemid = item_nameid;
         }
 
-        const currency = parseInt($J("#currency_buyorder").val() || (g_rgWalletInfo && g_rgWalletInfo['wallet_currency']) || 1);
+        const currency = parseInt($J("#currency_buyorder").val() || (typeof g_rgWalletInfo !== 'undefined' && g_rgWalletInfo['wallet_currency']) || 1);
         const strCode = Object.keys(g_rgCurrencyData).find((code) => g_rgCurrencyData[code].eCurrencyCode === currency);
 
 
@@ -401,7 +401,7 @@ function BeforeScript() {
 
     function overrideItemActivityTickerLoad() {
       ItemActivityTicker.Load =  function() {
-        const currency = $J("#currency_buyorder").val() || (g_rgWalletInfo && g_rgWalletInfo['wallet_currency']) || 1;
+        const currency = $J("#currency_buyorder").val() || (typeof g_rgWalletInfo !== 'undefined' && g_rgWalletInfo['wallet_currency']) || 1;
 
         // overwrite currency selection
         $J.ajax( {
